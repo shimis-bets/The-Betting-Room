@@ -280,23 +280,22 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
   </header>
 
   <nav class="br-nav" aria-label="Ενότητες">
-    <a href="#players" data-go="players">Παίκτες</a>
     <a href="#rounds" data-go="rounds">Αγωνιστικές</a>
-    <a href="#weeks" data-go="weeks">Πορεία</a>
     <a href="#tests" data-go="tests">Test bets</a>
+    <a href="#weeks" data-go="weeks">Πορεία</a>
+    <a href="#players" data-go="players">Παίκτες</a>
     <a href="#standings" data-go="standings">Πορεία καθενός</a>
     <a href="#learn" data-go="learn">AI Analytics</a>
   </nav>
 
-  <section class="br-sec" id="players">
-    <div class="br-h"><h2>Οι παίκτες</h2><p>Πώς πάει ο καθένας στις επίσημες αγωνιστικές, για να βλέπουμε πού χρειάζεται βοήθεια.</p></div>
-    <div class="br-cards" id="cards"></div>
-    <p class="br-foot">Σημείο: κάθε πρόβλεψη μέσα στο κουπόνι (κάθε σκέλος του Bet Builder μετράει χωριστά). Μέση απόδοση: η μέση απόδοση των κουπονιών του. Παρά λίγο: κουπόνια που χάθηκαν για ένα μόνο σημείο. Δυνατό και αδύναμο σημείο: η αγορά με το καλύτερο και το χειρότερο ποσοστό, από 2 σημεία και πάνω.</p>
-  </section>
-
   <section class="br-sec" id="rounds">
     <div class="br-h"><h2>Αγωνιστικές</h2><p>Πάτα σε μια αγωνιστική για να δεις τι έπαιξε ο καθένας και τι βγήκε.</p></div>
     <div class="br-rounds" id="rounds-box"></div>
+  </section>
+
+  <section class="br-sec" id="tests">
+    <div class="br-h"><h2>Test bets</h2><p>Οι δύο δοκιμαστικές αγωνιστικές. Δεν μετράνε σε κανένα από τα παραπάνω στατιστικά.</p></div>
+    <div class="br-rounds" id="tests-box"></div>
   </section>
 
   <section class="br-sec" id="weeks">
@@ -309,9 +308,10 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
     <div class="br-chart" id="chart2" data-source="team_weeks"></div>
   </section>
 
-  <section class="br-sec" id="tests">
-    <div class="br-h"><h2>Test bets</h2><p>Οι δύο δοκιμαστικές αγωνιστικές. Δεν μετράνε σε κανένα από τα παραπάνω στατιστικά.</p></div>
-    <div class="br-rounds" id="tests-box"></div>
+  <section class="br-sec" id="players">
+    <div class="br-h"><h2>Οι παίκτες</h2><p>Πώς πάει ο καθένας στις επίσημες αγωνιστικές, για να βλέπουμε πού χρειάζεται βοήθεια.</p></div>
+    <div class="br-cards" id="cards"></div>
+    <p class="br-foot">Σημείο: κάθε πρόβλεψη μέσα στο κουπόνι (κάθε σκέλος του Bet Builder μετράει χωριστά). Μέση απόδοση: η μέση απόδοση των κουπονιών του. Παρά λίγο: κουπόνια που χάθηκαν για ένα μόνο σημείο. Δυνατό και αδύναμο σημείο: η αγορά με το καλύτερο και το χειρότερο ποσοστό, από 2 σημεία και πάνω.</p>
   </section>
 
   <section class="br-sec" id="standings">
@@ -332,6 +332,7 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
     </div>
     <p class="br-foot">Σημεία: πόσα σημεία βγήκαν από όσα έπαιξε. Μονάδες: πόσο θα είχε κερδίσει αν έπαιζε μόνος του 1 μονάδα σε κάθε κουπόνι (κερδισμένο = απόδοση − 1, χαμένο = −1).</p>
   </section>
+
   <section class="br-sec" id="learn">
     <details class="br-fold br-ai-fold">
       <summary><div class="br-h" style="margin:0"><h2 class="br-ai-t"><span class="br-ai-b">AI</span>Συμβουλές AI Analytics</h2><p>Ποια σημεία να παίζουμε, με βάση όσα έχουμε παίξει στις επίσημες αγωνιστικές. Ανανεώνονται με κάθε νέα αγωνιστική.</p></div><span class="tg">Άνοιγμα</span></summary>
@@ -401,6 +402,7 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
     </div>
     </details>
   </section>
+
 </div>
 
 </div>
