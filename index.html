@@ -234,6 +234,9 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 .br-leg.no { background: color-mix(in srgb, var(--loss) 13%, transparent); color: var(--loss); }
 .br-leg.unk, .br-leg.push { border-color: var(--line); color: var(--muted); }
 
+.br-round-say { margin: 0; font-size: .86rem; padding: 9px 12px; border-radius: 8px; background: var(--color-panel); }
+.br-round-say b { font-weight: 800; }
+.br-round.gold .br-round-say { background: color-mix(in srgb, var(--gold) 14%, transparent); }
 /* standings */
 .br-fold > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .br-fold > summary::-webkit-details-marker { display: none; }
@@ -807,9 +810,13 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
     const tile = (label, kids) => el('div', '', [el('div', 'v', kids), el('div', 'l', [label])]);
     body.appendChild(el('div', 'br-rk', [
       tile('σημεία βγήκαν', [m('picks_won', String(o.picks_won)), '/', m('picks', String(o.picks))]),
-      tile('απόδοση 5 κουπονιών μαζί', [m('combo_odds', bigOdds(o.combo_odds))]),
+      tile(`απόδοση ${o.total} κουπονιών μαζί`, [m('combo_odds', bigOdds(o.combo_odds))]),
       o.perfect ? tile('κέρδος ομαδικού', [o.payout !== undefined ? m('payout', eur(o.payout)) : 'βγήκε'])
         : tile('σημεία δεν βγήκαν', [m('fails', String(o.fails))])]));
+    const n = o.total, all = n === 5 ? 'και τα 5 κουπόνια' : `και τα ${n} κουπόνια`;
+    body.appendChild(el('p', 'br-round-say', o.perfect
+      ? ['Πιάσαμε όλοι! Με 10€ το ομαδικό έδωσε ', el('b', '', [m('combo_odds', eur(10 * o.combo_odds))]), ` (απόδοση ${bigOdds(o.combo_odds)}).`]
+      : [`Το ομαδικό χάθηκε για ${o.fails} ${o.fails === 1 ? 'σημείο' : 'σημεία'}. Αν έβγαιναν ${all}, με 10€ θα παίρναμε `, el('b', '', [eur(10 * o.combo_odds)]), ` (απόδοση ${bigOdds(o.combo_odds)}).`]));
     rows.forEach(r => {
       const w = 'id=' + encodeURIComponent(r.id);
       const c = (f, t) => mk('coupons', f, w, t);
