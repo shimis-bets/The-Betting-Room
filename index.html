@@ -54,6 +54,9 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 .br-kpi .l { color: var(--muted); font-size: .74rem; }
 .br .pos { color: var(--win); } .br .neg { color: var(--loss); }
 
+.br-big { display: flex; flex-direction: column; flex: none; }
+.br-big-l { color: var(--muted); font-size: .76rem; margin-top: 4px; white-space: nowrap; }
+.br-kpis-h { font-size: .78rem; font-weight: 700; color: var(--muted); margin: 0 0 -8px; }
 /* ---------- nav ---------- */
 .br-nav { position: sticky; top: 0; z-index: 5; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 8px 0;
   background: color-mix(in srgb, var(--color-bg) 88%, transparent); backdrop-filter: blur(6px); margin-block: -8px; }
@@ -215,15 +218,16 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
     <div class="br-board" id="board" data-source="coupons">
       <div class="br-board-h"><h2 id="board-t">Τελευταία αγωνιστική</h2><span id="board-d"></span></div>
       <div class="br-score">
-        <b><span id="b-hit" data-source="team" data-field="last_hit" data-row="0">—</span><small>/<span id="b-tot" data-source="team" data-field="last_total" data-row="0">—</span></small></b>
+        <div class="br-big"><b><span id="b-hit" data-source="team" data-field="last_hit" data-row="0">—</span><small>/<span id="b-tot" data-source="team" data-field="last_total" data-row="0">—</span></small></b><span class="br-big-l">κουπόνια βγήκαν <span id="b-pct"></span></span></div>
         <p id="b-take" data-source="team" data-field="last_fails" data-row="0">—</p>
       </div>
       <div class="br-slots" id="slots"></div>
     </div>
 
+    <p class="br-kpis-h">Όλη η σεζόν (επίσημες αγωνιστικές)</p>
     <div class="br-kpis">
-      <div class="br-kpi"><div class="v" id="k-rate" data-source="team" data-field="win_rate" data-row="0">—</div><div class="l">κουπόνια βγήκαν (<span id="k-won" data-source="team" data-field="won" data-row="0">—</span>/<span id="k-cp" data-source="team" data-field="coupons" data-row="0">—</span>)</div></div>
-      <div class="br-kpi"><div class="v" id="k-picks" data-source="team" data-field="pick_rate" data-row="0">—</div><div class="l">σημεία βγήκαν (<span id="k-pw" data-source="team" data-field="picks_won" data-row="0">—</span>/<span id="k-pt" data-source="team" data-field="picks" data-row="0">—</span>)</div></div>
+      <div class="br-kpi"><div class="v" id="k-rate" data-source="team" data-field="win_rate" data-row="0">—</div><div class="l">κουπόνια (<span id="k-won" data-source="team" data-field="won" data-row="0">—</span>/<span id="k-cp" data-source="team" data-field="coupons" data-row="0">—</span>)</div></div>
+      <div class="br-kpi"><div class="v" id="k-picks" data-source="team" data-field="pick_rate" data-row="0">—</div><div class="l">σημεία (<span id="k-pw" data-source="team" data-field="picks_won" data-row="0">—</span>/<span id="k-pt" data-source="team" data-field="picks" data-row="0">—</span>)</div></div>
       <div class="br-kpi"><div class="v" id="k-net" data-source="team" data-field="net" data-row="0">—</div><div class="l">ταμείο (10€ / αγωνιστική)</div></div>
     </div>
   </header>
@@ -817,7 +821,8 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
     const slots = $('slots'); slots.textContent = '';
     if (tw.status === 'ok' && tw.data.length) {
       const lw = tw.data[tw.data.length - 1];
-      $('board-t').textContent = 'Αγωνιστική ' + tw.data.length;
+      $('board-t').textContent = 'Τελευταία αγωνιστική: Αγωνιστική ' + tw.data.length;
+      $('b-pct').textContent = '(' + pct(lw.hit / lw.total) + ')';
       $('board-d').textContent = range(lw.weekend, true);
       $('b-take').textContent = lw.all_hit ? `Πιάσαμε όλοι! Το ομαδικό έδωσε ${eur(lw.payout)}.`
         : `Το ομαδικό χάθηκε για ${lw.fails} ${lw.fails === 1 ? 'σημείο' : 'σημεία'}. Αν έβγαινε, θα έδινε ${eur(10 * lw.combo_odds)} με 10€.`;
