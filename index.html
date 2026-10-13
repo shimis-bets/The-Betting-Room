@@ -281,11 +281,11 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 
   <nav class="br-nav" aria-label="Ενότητες">
     <a href="#players" data-go="players">Παίκτες</a>
-    <a href="#learn" data-go="learn">AI Analytics</a>
     <a href="#rounds" data-go="rounds">Αγωνιστικές</a>
     <a href="#weeks" data-go="weeks">Πορεία</a>
     <a href="#tests" data-go="tests">Test bets</a>
     <a href="#standings" data-go="standings">Πορεία καθενός</a>
+    <a href="#learn" data-go="learn">AI Analytics</a>
   </nav>
 
   <section class="br-sec" id="players">
@@ -294,8 +294,47 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
     <p class="br-foot">Σημείο: κάθε πρόβλεψη μέσα στο κουπόνι (κάθε σκέλος του Bet Builder μετράει χωριστά). Μέση απόδοση: η μέση απόδοση των κουπονιών του. Παρά λίγο: κουπόνια που χάθηκαν για ένα μόνο σημείο. Δυνατό και αδύναμο σημείο: η αγορά με το καλύτερο και το χειρότερο ποσοστό, από 2 σημεία και πάνω.</p>
   </section>
 
+  <section class="br-sec" id="rounds">
+    <div class="br-h"><h2>Αγωνιστικές</h2><p>Πάτα σε μια αγωνιστική για να δεις τι έπαιξε ο καθένας και τι βγήκε.</p></div>
+    <div class="br-rounds" id="rounds-box"></div>
+  </section>
+
+  <section class="br-sec" id="weeks">
+    <div class="br-h"><h2>Πορεία της ομάδας</h2><p>Πώς πάμε από αγωνιστική σε αγωνιστική.</p></div>
+    <h3 class="br-h3" style="margin-top:0">Κουπόνια</h3>
+    <p class="br-p">Ποσοστό κουπονιών που βγήκαν κάθε Σαββατοκύριακο. Χρυσή μπάρα όταν πιάσαμε όλοι (100%).</p>
+    <div class="br-chart" id="chart" data-source="team_weeks"></div>
+    <h3 class="br-h3">Σημεία</h3>
+    <p class="br-p">Ποσοστό σημείων που βγήκαν κάθε Σαββατοκύριακο. Η γραμμή δείχνει αν ανεβαίνουμε ή πέφτουμε, η διακεκομμένη είναι το 50%.</p>
+    <div class="br-chart" id="chart2" data-source="team_weeks"></div>
+  </section>
+
+  <section class="br-sec" id="tests">
+    <div class="br-h"><h2>Test bets</h2><p>Οι δύο δοκιμαστικές αγωνιστικές. Δεν μετράνε σε κανένα από τα παραπάνω στατιστικά.</p></div>
+    <div class="br-rounds" id="tests-box"></div>
+  </section>
+
+  <section class="br-sec" id="standings">
+    <div class="br-h"><h2>Η πορεία του καθενός</h2><p>Για να βλέπει ο καθένας πού βρίσκεται και τι μπορεί να βελτιώσει. Είμαστε ομάδα.</p></div>
+    <div class="br-scroll">
+      <table data-source="standings" data-row-key="player">
+        <thead><tr>
+          <th data-field="player" class="l">Παίκτης</th>
+          <th data-field="coupons">Κουπόνια</th>
+          <th data-field="won">Σωστά</th>
+          <th data-field="lost">Λάθος</th>
+          <th data-field="pick_rate">Σημεία</th>
+          <th data-field="form" class="hide-s">Φόρμα</th>
+          <th data-field="profit">Μονάδες</th>
+        </tr></thead>
+        <tbody id="st-body"></tbody>
+      </table>
+    </div>
+    <p class="br-foot">Σημεία: πόσα σημεία βγήκαν από όσα έπαιξε. Μονάδες: πόσο θα είχε κερδίσει αν έπαιζε μόνος του 1 μονάδα σε κάθε κουπόνι (κερδισμένο = απόδοση − 1, χαμένο = −1).</p>
+  </section>
   <section class="br-sec" id="learn">
-    <div class="br-h"><h2 class="br-ai-t"><span class="br-ai-b">AI</span>Συμβουλές AI Analytics</h2><p>Ποια σημεία να παίζουμε, με βάση όσα έχουμε παίξει στις επίσημες αγωνιστικές. Ανανεώνονται με κάθε νέα αγωνιστική.</p></div>
+    <details class="br-fold br-ai-fold">
+      <summary><div class="br-h" style="margin:0"><h2 class="br-ai-t"><span class="br-ai-b">AI</span>Συμβουλές AI Analytics</h2><p>Ποια σημεία να παίζουμε, με βάση όσα έχουμε παίξει στις επίσημες αγωνιστικές. Ανανεώνονται με κάθε νέα αγωνιστική.</p></div><span class="tg">Άνοιγμα</span></summary>
     <div class="br-adv" id="advice" data-source="markets player_markets"></div>
     <h3 class="br-h3">Για τον καθένα</h3>
     <p class="br-p">Τι του βγαίνει και τι να προσέξει, από 2 σημεία και πάνω στην ίδια αγορά</p>
@@ -360,45 +399,7 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
         </table>
       </div>
     </div>
-  </section>
-
-  <section class="br-sec" id="rounds">
-    <div class="br-h"><h2>Αγωνιστικές</h2><p>Πάτα σε μια αγωνιστική για να δεις τι έπαιξε ο καθένας και τι βγήκε.</p></div>
-    <div class="br-rounds" id="rounds-box"></div>
-  </section>
-
-  <section class="br-sec" id="weeks">
-    <div class="br-h"><h2>Πορεία της ομάδας</h2><p>Πώς πάμε από αγωνιστική σε αγωνιστική.</p></div>
-    <h3 class="br-h3" style="margin-top:0">Κουπόνια</h3>
-    <p class="br-p">Ποσοστό κουπονιών που βγήκαν κάθε Σαββατοκύριακο. Χρυσή μπάρα όταν πιάσαμε όλοι (100%).</p>
-    <div class="br-chart" id="chart" data-source="team_weeks"></div>
-    <h3 class="br-h3">Σημεία</h3>
-    <p class="br-p">Ποσοστό σημείων που βγήκαν κάθε Σαββατοκύριακο. Η γραμμή δείχνει αν ανεβαίνουμε ή πέφτουμε, η διακεκομμένη είναι το 50%.</p>
-    <div class="br-chart" id="chart2" data-source="team_weeks"></div>
-  </section>
-
-  <section class="br-sec" id="tests">
-    <div class="br-h"><h2>Test bets</h2><p>Οι δύο δοκιμαστικές αγωνιστικές. Δεν μετράνε σε κανένα από τα παραπάνω στατιστικά.</p></div>
-    <div class="br-rounds" id="tests-box"></div>
-  </section>
-
-  <section class="br-sec" id="standings">
-    <div class="br-h"><h2>Η πορεία του καθενός</h2><p>Για να βλέπει ο καθένας πού βρίσκεται και τι μπορεί να βελτιώσει. Είμαστε ομάδα.</p></div>
-    <div class="br-scroll">
-      <table data-source="standings" data-row-key="player">
-        <thead><tr>
-          <th data-field="player" class="l">Παίκτης</th>
-          <th data-field="coupons">Κουπόνια</th>
-          <th data-field="won">Σωστά</th>
-          <th data-field="lost">Λάθος</th>
-          <th data-field="pick_rate">Σημεία</th>
-          <th data-field="form" class="hide-s">Φόρμα</th>
-          <th data-field="profit">Μονάδες</th>
-        </tr></thead>
-        <tbody id="st-body"></tbody>
-      </table>
-    </div>
-    <p class="br-foot">Σημεία: πόσα σημεία βγήκαν από όσα έπαιξε. Μονάδες: πόσο θα είχε κερδίσει αν έπαιζε μόνος του 1 μονάδα σε κάθε κουπόνι (κερδισμένο = απόδοση − 1, χαμένο = −1).</p>
+    </details>
   </section>
 </div>
 
@@ -867,7 +868,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
   document.querySelectorAll('.br-nav a').forEach(a => a.addEventListener('click', ev => {
     ev.preventDefault();
     const t = document.getElementById(a.dataset.go);
-    if (t) { t.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); dash.setLink(t.id); }
+    if (t) { const d = t.querySelector('details'); if (d) d.open = true; t.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); dash.setLink(t.id); }
   }));
   let linked = false;
 
@@ -972,6 +973,8 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
           el('td', 'nm ' + sign(r.profit), [units(r.profit)])])); });
     } else empty(sb, 7, '—');
 
+    document.querySelectorAll('.br-fold').forEach(fold => { if (!fold.dataset.wired) { fold.dataset.wired = '1';
+      fold.addEventListener('toggle', () => { fold.querySelector('.tg').textContent = fold.open ? 'Κλείσιμο' : 'Άνοιγμα'; }); } });
     if (!linked && tw.status === 'ok') {
       linked = true;
       const named = document.getElementById(location.hash.slice(1));
