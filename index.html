@@ -56,6 +56,7 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 
 .br-big { display: flex; flex-direction: column; flex: none; }
 .br-big-l { color: var(--muted); font-size: .76rem; margin-top: 4px; white-space: nowrap; }
+.br-kpis-f { color: var(--muted); font-size: .72rem; margin: -6px 0 0; }
 .br-kpis-h { font-size: .78rem; font-weight: 700; color: var(--muted); margin: 0 0 -8px; }
 .br-kpi .v small { font-size: .6em; color: var(--muted); font-weight: 700; }
 .br-kpi .l { line-height: 1.3; }
@@ -157,6 +158,20 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 .br-h .br-ai-t { display: flex; align-items: center; gap: 8px; }
 .br-ai-b { font-size: .68rem; font-weight: 800; letter-spacing: .04em; color: #fff; background: linear-gradient(135deg, var(--win), #2563eb); border-radius: 6px; padding: 2px 6px; }
 .br-ai-s { color: var(--muted); font-size: .76rem; margin-top: 2px; }
+.br-defs { display: grid; gap: 4px; margin: 0 0 6px; padding: 10px 12px; border-radius: 10px; border: 1px dashed var(--line); }
+.br-defs p { margin: 0; color: var(--muted); font-size: .76rem; }
+.br-defs b { color: var(--color-fg); font-weight: 700; }
+.br td.exp { color: var(--muted); }
+.br .who-s { display: none; font-weight: 400; color: var(--muted); font-size: .7rem; white-space: normal; margin-top: 2px; }
+@media (max-width: 560px) {
+  .br .who { display: none; }
+  .br .who-s { display: block; }
+  .br .rate .tr { display: none; }
+  .br .rate { justify-content: flex-end; }
+  .br-sub { padding: 10px; }
+  .br-sub th, .br-sub td { padding-inline: 4px; font-size: .78rem; }
+  .br td.nm { white-space: normal; }
+}
 /* ---------- chart ---------- */
 .br-chart { position: relative; min-height: 240px; }
 .br-tip { position: absolute; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius);
@@ -235,8 +250,9 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
     <div class="br-kpis">
       <div class="br-kpi"><div class="v"><span id="k-won" data-source="team" data-field="won" data-row="0">—</span><small>/<span id="k-cp" data-source="team" data-field="coupons" data-row="0">—</span></small></div><div class="l">κουπόνια βγήκαν <span id="k-rate" data-source="team" data-field="win_rate" data-row="0"></span></div></div>
       <div class="br-kpi"><div class="v"><span id="k-pw" data-source="team" data-field="picks_won" data-row="0">—</span><small>/<span id="k-pt" data-source="team" data-field="picks" data-row="0">—</span></small></div><div class="l">σημεία βγήκαν <span id="k-picks" data-source="team" data-field="pick_rate" data-row="0"></span></div></div>
-      <div class="br-kpi"><div class="v" id="k-net" data-source="team" data-field="net" data-row="0">—</div><div class="l">ταμείο: <span id="k-inv" data-source="team" data-field="invested" data-row="0">—</span> παίχτηκαν, <span id="k-ret" data-source="team" data-field="returned" data-row="0">—</span> κέρδη</div></div>
+      <div class="br-kpi"><div class="v" id="k-net" data-source="team" data-field="net" data-row="0">—</div><div class="l">ταμείο ομαδικού: <span id="k-inv" data-source="team" data-field="invested" data-row="0">—</span> παίχτηκαν, <span id="k-ret" data-source="team" data-field="returned" data-row="0">—</span> κέρδη</div></div>
     </div>
+    <p class="br-kpis-f">Σημείο = κάθε πρόβλεψη μέσα στο κουπόνι (κάθε σκέλος του Bet Builder μετράει χωριστά). Το ομαδικό είναι τα 5 κουπόνια μαζί με 10€ κάθε αγωνιστική.</p>
   </header>
 
   <nav class="br-nav" aria-label="Ενότητες">
@@ -251,22 +267,28 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
   <section class="br-sec" id="players">
     <div class="br-h"><h2>Οι παίκτες</h2><p>Πώς πάει ο καθένας στις επίσημες αγωνιστικές, για να βλέπουμε πού χρειάζεται βοήθεια.</p></div>
     <div class="br-cards" id="cards"></div>
-    <p class="br-foot">Παρά λίγο: κουπόνια που χάθηκαν για ένα μόνο σημείο. Δυνατό και αδύναμο σημείο: η αγορά με το καλύτερο και το χειρότερο ποσοστό, από 2 σημεία και πάνω.</p>
+    <p class="br-foot">Σημείο: κάθε πρόβλεψη μέσα στο κουπόνι (κάθε σκέλος του Bet Builder μετράει χωριστά). Μέση απόδοση: η μέση απόδοση των κουπονιών του. Παρά λίγο: κουπόνια που χάθηκαν για ένα μόνο σημείο. Δυνατό και αδύναμο σημείο: η αγορά με το καλύτερο και το χειρότερο ποσοστό, από 2 σημεία και πάνω.</p>
   </section>
 
   <section class="br-sec" id="learn">
-    <div class="br-h"><h2 class="br-ai-t"><span class="br-ai-b">AI</span>Συμβουλές AI Analytics</h2><p>Βγαίνουν αυτόματα από τα στατιστικά μας και ανανεώνονται με κάθε νέα αγωνιστική. Μετράνε μόνο οι επίσημες αγωνιστικές και σημεία που επιβεβαιώθηκαν.</p></div>
-    <ul class="br-tips" id="tips" data-source="markets odds_bands sel_types bb_size coupon_size fail_markets"></ul>
+    <div class="br-h"><h2 class="br-ai-t"><span class="br-ai-b">AI</span>Συμβουλές AI Analytics</h2><p>Βγαίνουν αυτόματα από τις επίσημες αγωνιστικές και ανανεώνονται κάθε εβδομάδα. Συγκρίνουν πόσο συχνά βγαίνουν οι επιλογές μας με το πόσο συχνά «έλεγαν» οι αποδόσεις ότι θα βγουν, και εμφανίζονται μόνο όταν υπάρχουν αρκετά παιχνίδια πίσω τους.</p></div>
+    <ul class="br-tips" id="tips" data-source="pickers markets odds_bands sel_types bb_size fail_markets"></ul>
+    <div class="br-defs">
+      <p><b>Σημείο:</b> κάθε πρόβλεψη μέσα στο κουπόνι. Κάθε σκέλος ενός Bet Builder μετράει ως ξεχωριστό σημείο.</p>
+      <p><b>Επιλογή:</b> ένα ματς του κουπονιού. Βγαίνει μόνο αν βγουν όλα τα σημεία του.</p>
+      <p><b>Αναμενόμενο:</b> πόσο συχνά «λέει» η απόδοση ότι θα βγει (1 ÷ απόδοση). Π.χ. απόδοση 2.00 σημαίνει περίπου 50%. Αν βγαίνουμε πάνω από αυτό, διαλέγουμε καλά.</p>
+    </div>
 
     <h3 class="br-h3">Ανά αγορά</h3>
+    <p class="br-p">Πόσα σημεία βγήκαν σε κάθε είδος πρόβλεψης</p>
     <div class="br-scroll">
       <table data-source="markets" data-row-key="market">
         <thead><tr>
           <th data-field="market" class="l">Αγορά</th>
-          <th data-field="won">Σωστά</th>
+          <th data-field="won">Βγήκαν</th>
           <th data-field="legs">Από</th>
           <th data-field="rate">Ποσοστό</th>
-          <th data-field="players" class="l">Ποιος πώς πάει</th>
+          <th data-field="players" class="l who">Ποιος πώς πάει</th>
         </tr></thead>
         <tbody id="mk-body"></tbody>
       </table>
@@ -274,23 +296,23 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
     <div class="br-key"><span><i class="b-good"></i>70% και πάνω</span><span><i class="b-mid"></i>50–69%</span><span><i class="b-bad"></i>κάτω από 50%</span><span>αχνές γραμμές στο τέλος: λιγότερα από 3 σημεία, μικρό δείγμα</span></div>
 
     <h3 class="br-h3">Τι έριξε το ομαδικό</h3>
-    <p class="br-p">Από ποιες αγορές ήρθαν τα λάθος σημεία μας</p>
+    <p class="br-p">Από ποιες αγορές ήρθαν τα σημεία που δεν βγήκαν</p>
     <div class="br-fails" id="fails" data-source="fail_markets"></div>
 
     <div class="br-grid2">
       <div class="br-sub">
         <h3>Μονή επιλογή ή Bet Builder;</h3>
-        <p>Πόσες επιλογές του δελτίου βγήκαν ολόκληρες</p>
+        <p>Πόσες επιλογές βγήκαν, ανάλογα με το είδος τους</p>
         <table data-source="sel_types" data-row-key="sel_type">
-          <thead><tr><th data-field="sel_type" class="l">Επιλογή</th><th data-field="won">Βγήκαν</th><th data-field="selections">Από</th><th data-field="rate">Ποσοστό</th></tr></thead>
+          <thead><tr><th data-field="sel_type" class="l">Επιλογή</th><th data-field="won">Βγήκαν</th><th data-field="selections">Από</th><th data-field="rate">Ποσοστό</th><th data-field="expected">Αναμεν.</th></tr></thead>
           <tbody id="st2-body"></tbody>
         </table>
       </div>
       <div class="br-sub">
         <h3>Πόσα σημεία στο Bet Builder;</h3>
-        <p>Πόσα Bet Builder βγήκαν, ανάλογα με τα σημεία τους</p>
+        <p>Πόσα Bet Builder βγήκαν ολόκληρα, ανάλογα με τα σημεία τους</p>
         <table data-source="bb_size" data-row-key="size">
-          <thead><tr><th data-field="size" class="l">Bet Builder με</th><th data-field="won">Βγήκαν</th><th data-field="selections">Από</th><th data-field="rate">Ποσοστό</th></tr></thead>
+          <thead><tr><th data-field="size" class="l">Bet Builder με</th><th data-field="won">Βγήκαν</th><th data-field="selections">Από</th><th data-field="rate">Ποσοστό</th><th data-field="expected">Αναμεν.</th></tr></thead>
           <tbody id="bb-body"></tbody>
         </table>
       </div>
@@ -298,15 +320,15 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
         <h3>Πόσα ματς στο κουπόνι;</h3>
         <p>Πόσα κουπόνια βγήκαν, ανάλογα με τα ματς τους</p>
         <table data-source="coupon_size" data-row-key="size">
-          <thead><tr><th data-field="size" class="l">Κουπόνι με</th><th data-field="won">Βγήκαν</th><th data-field="selections">Από</th><th data-field="rate">Ποσοστό</th></tr></thead>
+          <thead><tr><th data-field="size" class="l">Κουπόνι με</th><th data-field="won">Βγήκαν</th><th data-field="selections">Από</th><th data-field="rate">Ποσοστό</th><th data-field="expected">Αναμεν.</th></tr></thead>
           <tbody id="cs-body"></tbody>
         </table>
       </div>
       <div class="br-sub">
         <h3>Βγαίνουν οι «σίγουρες» αποδόσεις;</h3>
-        <p>Ποσοστό επιτυχίας ανά απόδοση επιλογής</p>
+        <p>Πόσες επιλογές βγήκαν, ανάλογα με την απόδοσή τους</p>
         <table data-source="odds_bands" data-row-key="band">
-          <thead><tr><th data-field="band" class="l">Απόδοση</th><th data-field="won">Βγήκαν</th><th data-field="selections">Από</th><th data-field="rate">Ποσοστό</th></tr></thead>
+          <thead><tr><th data-field="band" class="l">Απόδοση</th><th data-field="won">Βγήκαν</th><th data-field="selections">Από</th><th data-field="rate">Ποσοστό</th><th data-field="expected">Αναμεν.</th></tr></thead>
           <tbody id="ob-body"></tbody>
         </table>
       </div>
@@ -467,83 +489,89 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
     }
   });
 
-  dash.calc('sel_types', {
-    title: 'Μονή επιλογή ή Bet Builder',
-    description: 'Κάθε επιλογή του δελτίου (ένα ματς) στις επίσημες αγωνιστικές: βγήκε αν βγήκαν όλα τα σημεία της. Χωρίς επιλογές με σημείο που δεν επιβεβαιώθηκε.',
+  dash.calc('selections', {
+    title: 'Επιλογές με την απόδοσή τους',
+    description: 'Κάθε επιλογή (ένα ματς του κουπονιού) των επίσημων αγωνιστικών: παίκτης, απόδοση, αν είναι Bet Builder και πόσα σημεία έχει, αν βγήκε. Βγήκε αν βγήκαν όλα τα σημεία της. Χωρίς επιλογές με σημείο που δεν επιβεβαιώθηκε. Αναμενόμενο = 1 ÷ απόδοση.',
     inputs: ['legs'],
     fn: (legs) => {
-      const l = legs.filter(x => x.id !== 'template' && !x.test);
       const sels = {};
-      l.forEach(x => {
+      legs.filter(x => x.id !== 'template' && !x.test).forEach(x => {
         const k = x.coupon_id + '#' + x.sel;
-        const s = sels[k] || (sels[k] = { type: x.sel_type, no: 0, unk: 0 });
-        if (x.result === 'Λάθος') s.no += 1; if (x.result === 'Άγνωστο') s.unk += 1;
+        const s = sels[k] || (sels[k] = { key: k, player: x.player, odds: Number(x.sel_odds), type: x.sel_type, n: 0, no: 0, unk: 0 });
+        s.n += 1; if (x.result === 'Λάθος') s.no += 1; if (x.result === 'Άγνωστο') s.unk += 1;
       });
+      return Object.values(sels).filter(s => s.no > 0 || s.unk === 0)
+        .map(s => ({ key: s.key, player: s.player, odds: s.odds, type: s.type, legs: s.n, won: s.no === 0 ? 1 : 0, expected: Math.round(1 / s.odds * 10000) / 10000 }));
+    }
+  });
+
+  dash.calc('sel_types', {
+    title: 'Μονή επιλογή ή Bet Builder',
+    description: 'Επιλογές των επίσημων αγωνιστικών ανά είδος: πόσες βγήκαν, ποσοστό, και πόσο συχνά «έλεγαν» οι αποδόσεις ότι θα βγουν (μέσος όρος του 1 ÷ απόδοση).',
+    inputs: ['selections'],
+    fn: (selections) => {
       const by = {};
-      Object.values(sels).filter(s => s.no > 0 || s.unk === 0).forEach(s => {
-        const g = by[s.type] || (by[s.type] = { sel_type: s.type, selections: 0, won: 0 });
-        g.selections += 1; if (s.no === 0) g.won += 1;
-      });
-      return Object.values(by).map(g => Object.assign(g, { rate: g.won / g.selections })).sort((a, b) => b.rate - a.rate);
+      selections.forEach(s => { const g = by[s.type] || (by[s.type] = { sel_type: s.type, selections: 0, won: 0, exp: 0 });
+        g.selections += 1; g.won += s.won; g.exp += s.expected; });
+      return Object.values(by).map(g => ({ sel_type: g.sel_type, selections: g.selections, won: g.won, rate: g.won / g.selections,
+        expected: g.exp / g.selections })).sort((a, b) => b.selections - a.selections);
     }
   });
 
   dash.calc('odds_bands', {
     title: 'Ποσοστό ανά απόδοση επιλογής',
-    description: 'Κάθε επιλογή του δελτίου στις επίσημες αγωνιστικές, ανά απόδοση: πόσες βγήκαν ολόκληρες. Χωρίς επιλογές με σημείο που δεν επιβεβαιώθηκε.',
-    inputs: ['legs'],
-    fn: (legs) => {
-      const l = legs.filter(x => x.id !== 'template' && !x.test);
-      const sels = {};
-      l.forEach(x => {
-        const k = x.coupon_id + '#' + x.sel;
-        const s = sels[k] || (sels[k] = { odds: Number(x.sel_odds), no: 0, unk: 0 });
-        if (x.result === 'Λάθος') s.no += 1; if (x.result === 'Άγνωστο') s.unk += 1;
-      });
+    description: 'Επιλογές των επίσημων αγωνιστικών ανά απόδοση: πόσες βγήκαν, ποσοστό, και πόσο συχνά «έλεγαν» οι αποδόσεις ότι θα βγουν (μέσος όρος του 1 ÷ απόδοση).',
+    inputs: ['selections'],
+    fn: (selections) => {
       const bands = [['έως 1.50', 0, 1.50], ['1.51 – 1.70', 1.505, 1.70], ['1.71 – 1.90', 1.705, 1.90], ['πάνω από 1.90', 1.905, 1e9]];
-      const rows = bands.map((b, i) => ({ band: b[0], order: i, selections: 0, won: 0 }));
-      Object.values(sels).filter(s => s.no > 0 || s.unk === 0).forEach(s => {
-        const i = bands.findIndex(b => s.odds >= b[1] && s.odds <= b[2]);
-        rows[i].selections += 1; if (s.no === 0) rows[i].won += 1;
-      });
-      return rows.filter(r => r.selections).map(r => Object.assign(r, { rate: r.won / r.selections }));
+      const rows = bands.map((b, i) => ({ band: b[0], order: i, selections: 0, won: 0, exp: 0 }));
+      selections.forEach(s => { const i = bands.findIndex(b => s.odds >= b[1] && s.odds <= b[2]);
+        rows[i].selections += 1; rows[i].won += s.won; rows[i].exp += s.expected; });
+      return rows.filter(r => r.selections).map(r => ({ band: r.band, order: r.order, selections: r.selections, won: r.won,
+        rate: r.won / r.selections, expected: r.exp / r.selections }));
     }
   });
 
   dash.calc('bb_size', {
     title: 'Bet Builder ανά πλήθος σημείων',
-    description: 'Bet Builder των επίσημων αγωνιστικών, ανάλογα με το πόσα σημεία είχαν: πόσα βγήκαν ολόκληρα. Χωρίς όσα έχουν σημείο που δεν επιβεβαιώθηκε.',
-    inputs: ['legs'],
-    fn: (legs) => {
-      const sels = {};
-      legs.filter(x => x.id !== 'template' && !x.test && x.sel_type === 'Bet Builder').forEach(x => {
-        const k = x.coupon_id + '#' + x.sel;
-        const s = sels[k] || (sels[k] = { n: 0, no: 0, unk: 0 });
-        s.n += 1; if (x.result === 'Λάθος') s.no += 1; if (x.result === 'Άγνωστο') s.unk += 1;
-      });
+    description: 'Bet Builder των επίσημων αγωνιστικών ανάλογα με τα σημεία τους: πόσα βγήκαν ολόκληρα, ποσοστό, και τι «έλεγαν» οι αποδόσεις (μέσος όρος του 1 ÷ απόδοση).',
+    inputs: ['selections'],
+    fn: (selections) => {
       const by = {};
-      Object.values(sels).filter(s => s.no > 0 || s.unk === 0).forEach(s => {
-        const key = s.n <= 2 ? '2 σημεία' : s.n === 3 ? '3 σημεία' : '4+ σημεία';
-        const g = by[key] || (by[key] = { size: key, order: Math.min(s.n, 4), selections: 0, won: 0 });
-        g.selections += 1; if (s.no === 0) g.won += 1;
-      });
-      return Object.values(by).sort((a, b) => a.order - b.order).map(g => Object.assign(g, { rate: g.won / g.selections }));
+      selections.filter(s => s.type === 'Bet Builder').forEach(s => {
+        const key = s.legs <= 2 ? '2 σημεία' : s.legs === 3 ? '3 σημεία' : '4+ σημεία';
+        const g = by[key] || (by[key] = { size: key, order: Math.min(s.legs, 4), selections: 0, won: 0, exp: 0 });
+        g.selections += 1; g.won += s.won; g.exp += s.expected; });
+      return Object.values(by).sort((a, b) => a.order - b.order).map(g => ({ size: g.size, order: g.order, selections: g.selections, won: g.won,
+        rate: g.won / g.selections, expected: g.exp / g.selections }));
     }
   });
 
   dash.calc('coupon_size', {
-    title: 'Κουπόνια ανά πλήθος επιλογών',
-    description: 'Κουπόνια των επίσημων αγωνιστικών, ανάλογα με το πόσα ματς είχαν: πόσα βγήκαν.',
+    title: 'Κουπόνια ανά πλήθος ματς',
+    description: 'Κουπόνια των επίσημων αγωνιστικών ανάλογα με τα ματς τους: πόσα βγήκαν, ποσοστό, και τι «έλεγαν» οι αποδόσεις (μέσος όρος του 1 ÷ απόδοση κουπονιού).',
     inputs: ['coupons'],
     fn: (coupons) => {
       const by = {};
       coupons.filter(x => x.id !== 'template' && !x.test).forEach(x => {
         const n = Number(x.selections);
         const key = n <= 2 ? '1–2 ματς' : n === 3 ? '3 ματς' : '4+ ματς';
-        const g = by[key] || (by[key] = { size: key, order: Math.min(n, 4), selections: 0, won: 0 });
-        g.selections += 1; if (x.status === 'Κέρδισε') g.won += 1;
-      });
-      return Object.values(by).sort((a, b) => a.order - b.order).map(g => Object.assign(g, { rate: g.won / g.selections }));
+        const g = by[key] || (by[key] = { size: key, order: Math.min(n, 4), selections: 0, won: 0, exp: 0 });
+        g.selections += 1; if (x.status === 'Κέρδισε') g.won += 1; g.exp += 1 / Number(x.odds); });
+      return Object.values(by).sort((a, b) => a.order - b.order).map(g => ({ size: g.size, order: g.order, selections: g.selections, won: g.won,
+        rate: g.won / g.selections, expected: g.exp / g.selections }));
+    }
+  });
+
+  dash.calc('pickers', {
+    title: 'Ποιος διαλέγει πάνω από τις αποδόσεις',
+    description: 'Ανά παίκτη και για όλη την ομάδα: επιλογές που βγήκαν, ποσοστό, τι «έλεγαν» οι αποδόσεις (μέσος όρος του 1 ÷ απόδοση) και η διαφορά τους.',
+    inputs: ['selections'],
+    fn: (selections) => {
+      const by = { 'Ομάδα': { who: 'Ομάδα', n: 0, won: 0, exp: 0 } };
+      selections.forEach(s => { [s.player, 'Ομάδα'].forEach(k => { const g = by[k] || (by[k] = { who: k, n: 0, won: 0, exp: 0 });
+        g.n += 1; g.won += s.won; g.exp += s.expected; }); });
+      return Object.values(by).map(g => ({ who: g.who, selections: g.n, won: g.won, rate: g.won / g.n, expected: g.exp / g.n, edge: g.won / g.n - g.exp / g.n }));
     }
   });
 
@@ -618,7 +646,8 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
   const tone = r => r >= .7 ? 'good' : r >= .5 ? 'mid' : 'bad';
   const $ = id => document.getElementById(id);
   let players = [];
-  const colorOf = name => { const i = players.findIndex(p => p.player === name); return dash.colors[(i < 0 ? 0 : i) % dash.colors.length]; };
+  const PCOL = { Shimis: '#f97316', Pourou: '#16a34a', Aggelos: '#eab308', Anthony: '#2563eb', Dorch: '#dc2626' };
+  const colorOf = name => PCOL[name] || (() => { const i = players.findIndex(p => p.player === name); return dash.colors[(i < 0 ? 0 : i) % dash.colors.length]; })();
   const orderOf = name => { const i = players.findIndex(p => p.player === name); return i < 0 ? 99 : i; };
 
   function el(tag, cls, kids, attrs) {
@@ -709,7 +738,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
       meter('κουπόνια βγήκαν', 'win_rate', p.win_rate, 'won', p.won, 'coupons', p.coupons),
       meter('σημεία βγήκαν', 'pick_rate', p.pick_rate, 'picks_won', p.picks_won, 'picks', p.picks)]));
     const fact = (label, f, t) => el('div', '', [el('div', 'v', [m(f, t)]), el('div', 'l', [label])]);
-    c.appendChild(el('div', 'br-facts', [fact('μέση απόδοση', 'avg_odds', odds(p.avg_odds)), fact('λάθος κουπόνια', 'lost', String(p.lost)), fact('παρά λίγο', 'near_miss', String(p.near_miss))]));
+    c.appendChild(el('div', 'br-facts', [fact('μέση απόδοση κουπονιού', 'avg_odds', odds(p.avg_odds)), fact('λάθος κουπόνια', 'lost', String(p.lost)), fact('παρά λίγο', 'near_miss', String(p.near_miss))]));
     const sw = (label, f, sf, name, score, cls) => el('div', '', [el('span', 'k', [label]), el('span', 'm', [m(f, name || '—')]), score ? el('span', 's ' + cls, [m(sf, score)]) : el('span', '', [])]);
     c.appendChild(el('div', 'br-sw', [
       sw('Δυνατό σημείο', 'strong', 'strong_score', p.strong, p.strong_score, 't-good'),
@@ -734,9 +763,9 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
     const tile = (label, kids) => el('div', '', [el('div', 'v', kids), el('div', 'l', [label])]);
     body.appendChild(el('div', 'br-rk', [
       tile('σημεία βγήκαν', [m('picks_won', String(o.picks_won)), '/', m('picks', String(o.picks))]),
-      tile('απόδοση ομαδικού', [m('combo_odds', bigOdds(o.combo_odds))]),
+      tile('απόδοση 5 κουπονιών μαζί', [m('combo_odds', bigOdds(o.combo_odds))]),
       o.perfect ? tile('κέρδος ομαδικού', [o.payout !== undefined ? m('payout', eur(o.payout)) : 'βγήκε'])
-        : tile('το ομαδικό χάθηκε για', [m('fails', String(o.fails)), o.fails === 1 ? ' σημείο' : ' σημεία'])]));
+        : tile('σημεία δεν βγήκαν', [m('fails', String(o.fails))])]));
     rows.forEach(r => {
       const w = 'id=' + encodeURIComponent(r.id);
       const c = (f, t) => mk('coupons', f, w, t);
@@ -749,54 +778,66 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
     return d;
   }
 
-  function renderTips(mkt, ob, sty, bbs, cs, fm) {
+  function renderTips(pk, mkt, ob, sty, bbs, fm) {
     const ul = $('tips'); ul.textContent = '';
     const ok = r => r.status === 'ok' && r.data.length;
     const B = (src, f, w, t) => el('b', '', [t], { 'data-source': src, 'data-field': f, 'data-where': w });
     const add = (kind, icon, main, why) => ul.appendChild(el('li', kind, [el('span', 'ic', [icon]), el('div', '', main.concat(why ? [el('span', 'why', why)] : []))]));
-    const rec = (src, key, r, n) => { const w = key + '=' + encodeURIComponent(r[key]); return [B(src, 'won', w, String(r.won)), '/', B(src, n, w, String(r[n]))]; };
-    if (ok(mkt)) {
-      const big = mkt.data.filter(r => r.legs >= 4);
-      const good = big.filter(r => r.rate >= .75).slice(0, 2);
-      good.forEach(r => add('good', '✓', ['Συνεχίστε ', B('markets', 'market', 'market=' + encodeURIComponent(r.market), r.market), ': βγαίνει ', ...rec('markets', 'market', r, 'legs'), ' (', pct(r.rate), ').'],
-        ['Την παίζουν: ' + r.players]));
-      const bad = big.filter(r => r.rate < .6).sort((a, b) => a.rate - b.rate).slice(0, 2);
-      bad.forEach(r => add('bad', '!', ['Προσοχή στο ', B('markets', 'market', 'market=' + encodeURIComponent(r.market), r.market), ': μόνο ', ...rec('markets', 'market', r, 'legs'), ' (', pct(r.rate), ').'],
-        ['Πριν το βάλετε, ρωτήστε όποιον το πιάνει πιο συχνά: ' + r.players]));
+    const pp = v => Math.round(v * 100);
+    const diffTxt = d => (d >= 0 ? '+' : '−') + Math.abs(pp(d)) + ' ποσοστιαίες μονάδες';
+    // 1. Η ομάδα σε σχέση με τις αποδόσεις
+    if (ok(pk)) {
+      const tm = pk.data.find(r => r.who === 'Ομάδα'), w = 'who=' + encodeURIComponent('Ομάδα');
+      if (tm && tm.selections >= 15) {
+        const good = tm.edge >= .03;
+        add(good ? 'good' : tm.edge <= -.03 ? 'bad' : 'info', good ? '✓' : tm.edge <= -.03 ? '!' : 'i',
+          ['Οι επιλογές μας βγαίνουν ', B('pickers', 'won', w, String(tm.won)), '/', B('pickers', 'selections', w, String(tm.selections)), ' (', B('pickers', 'rate', w, pct(tm.rate)), '), ενώ οι αποδόσεις «έλεγαν» ', B('pickers', 'expected', w, pct(tm.expected)), '.'],
+          [good ? `Διαλέγουμε καλύτερα από τον bookmaker κατά ${diffTxt(tm.edge)}. Συνεχίζουμε έτσι.` : tm.edge <= -.03 ? 'Βγαίνουμε λιγότερο από όσο λένε οι αποδόσεις. Χρειάζεται πιο προσεκτική επιλογή.' : 'Βγαίνουμε περίπου όσο λένε οι αποδόσεις.']);
+      }
+      // 2. Ποιος διαλέγει πάνω από τις αποδόσεις (από 8 επιλογές)
+      const ps = pk.data.filter(r => r.who !== 'Ομάδα' && r.selections >= 8);
+      const top = ps.filter(r => r.edge >= .1).sort((a, b) => b.edge - a.edge);
+      if (top.length) {
+        const parts = []; top.forEach((r, i) => { const w2 = 'who=' + encodeURIComponent(r.who); if (i) parts.push(i === top.length - 1 ? ' και ' : ', ');
+          parts.push(B('pickers', 'who', w2, r.who), ` (${r.won}/${r.selections}, αναμενόταν ${pct(r.expected)})`); });
+        add('good', '✓', ['Πολύ πάνω από τις αποδόσεις διαλέγουν: ', ...parts, '.'], ['Πριν κλείσετε τα δελτία σας, ζητήστε τη γνώμη τους.']);
+      }
+      const low = ps.filter(r => r.edge <= -.1).sort((a, b) => a.edge - b.edge);
+      low.forEach(r => { const w2 = 'who=' + encodeURIComponent(r.who);
+        add('info', 'i', [B('pickers', 'who', w2, r.who), ': οι επιλογές του βγαίνουν ', `${r.won}/${r.selections} (${pct(r.rate)})`, ', ενώ οι αποδόσεις «έλεγαν» ', pct(r.expected), '.'], ['Ας του δώσουμε μια δεύτερη ματιά στο δελτίο πριν παιχτεί.']); });
     }
+    // 3. Αποδόσεις: μόνο ομάδες με 5+ επιλογές και διαφορά 15+ μονάδες
     if (ok(ob)) {
-      const hi = ob.data.find(r => r.band === 'πάνω από 1.90');
-      const lo = ob.data.find(r => r.band === 'έως 1.50');
-      if (hi && hi.selections >= 3 && hi.rate < .45) add('bad', '!', ['Επιλογές με απόδοση ', B('odds_bands', 'band', 'band=' + encodeURIComponent(hi.band), 'πάνω από 1.90'), ' βγαίνουν μόνο ', ...rec('odds_bands', 'band', hi, 'selections'), '.'],
-        [lo ? `Οι επιλογές έως 1.50 βγαίνουν ${lo.won}/${lo.selections}. Καλύτερα να φτάνετε την απόδοση με σίγουρες επιλογές παρά με μία ρίσκο.` : 'Καλύτερα να φτάνετε την απόδοση με σίγουρες επιλογές παρά με μία ρίσκο.']);
+      ob.data.filter(r => r.selections >= 5 && r.rate - r.expected <= -.15).forEach(r => { const w = 'band=' + encodeURIComponent(r.band);
+        add('bad', '!', ['Επιλογές με απόδοση ', B('odds_bands', 'band', w, r.band), ' βγαίνουν ', B('odds_bands', 'won', w, String(r.won)), '/', B('odds_bands', 'selections', w, String(r.selections)), ` (${pct(r.rate)}), ενώ οι αποδόσεις «έλεγαν» ${pct(r.expected)}.`],
+          ['Εδώ χάνουμε περισσότερο από όσο θα έπρεπε. Καλύτερα να φτάνουμε την απόδοση με πιο σίγουρες επιλογές.']); });
+      ob.data.filter(r => r.selections >= 5 && r.rate - r.expected >= .15).forEach(r => { const w = 'band=' + encodeURIComponent(r.band);
+        add('good', '✓', ['Επιλογές με απόδοση ', B('odds_bands', 'band', w, r.band), ' βγαίνουν ', B('odds_bands', 'won', w, String(r.won)), '/', B('odds_bands', 'selections', w, String(r.selections)), ` (${pct(r.rate)}), ενώ οι αποδόσεις «έλεγαν» ${pct(r.expected)}.`],
+          ['Σε αυτές τις αποδόσεις βρίσκουμε τις καλύτερες ευκαιρίες.']); });
     }
+    // 4. Μονή ή Bet Builder, σε σχέση με τις αποδόσεις (από 8 επιλογές το καθένα)
     if (ok(sty)) {
       const s = sty.data.find(r => r.sel_type === 'Μονή'), b = sty.data.find(r => r.sel_type === 'Bet Builder');
-      if (s && b && b.selections >= 4 && s.rate - b.rate >= .1) add('info', 'i', ['Οι μονές επιλογές βγαίνουν ', ...rec('sel_types', 'sel_type', s, 'selections'), ', τα Bet Builder ', ...rec('sel_types', 'sel_type', b, 'selections'), '.'],
-        ['Κάθε σημείο που προσθέτετε σε Bet Builder είναι ένα ακόμα σημείο που μπορεί να χαθεί.']);
+      if (s && b && s.selections >= 8 && b.selections >= 8 && (s.rate - s.expected) - (b.rate - b.expected) >= .05)
+        add('info', 'i', ['Οι μονές επιλογές βγαίνουν ', diffTxt(s.rate - s.expected), ' πάνω από τις αποδόσεις, τα Bet Builder ', diffTxt(b.rate - b.expected), '.'],
+          ['Στις μονές επιλογές διαλέγουμε καλύτερα. Στα Bet Builder κάθε σημείο που προσθέτουμε είναι ένα ακόμα που μπορεί να χαθεί.']);
     }
-    if (ok(bbs) && bbs.data.length >= 2) {
-      const two = bbs.data.find(r => r.size === '2 σημεία'), more = bbs.data.filter(r => r.size !== '2 σημεία');
-      const mw = more.reduce((x, r) => x + r.won, 0), mn = more.reduce((x, r) => x + r.selections, 0);
-      if (two && mn >= 2 && two.rate - mw / mn >= .1) add('info', 'i', ['Bet Builder με 2 σημεία βγαίνουν ', ...rec('bb_size', 'size', two, 'selections'), `, με 3 και πάνω ${mw}/${mn}.`], ['Κρατήστε τα Bet Builder μικρά.']);
+    // 5. Αγορές: μόνο από 6 σημεία
+    if (ok(mkt)) {
+      mkt.data.filter(r => r.legs >= 6 && r.rate >= .75).slice(0, 2).forEach(r => { const w = 'market=' + encodeURIComponent(r.market);
+        add('good', '✓', [B('markets', 'market', w, r.market), ': βγαίνει ', B('markets', 'won', w, String(r.won)), '/', B('markets', 'legs', w, String(r.legs)), ` (${pct(r.rate)}).`], ['Ποιος πώς πάει: ' + r.players]); });
+      mkt.data.filter(r => r.legs >= 6 && r.rate <= .6).sort((a, b) => a.rate - b.rate).slice(0, 2).forEach(r => { const w = 'market=' + encodeURIComponent(r.market);
+        add('bad', '!', [B('markets', 'market', w, r.market), ': βγαίνει μόνο ', B('markets', 'won', w, String(r.won)), '/', B('markets', 'legs', w, String(r.legs)), ` (${pct(r.rate)}).`], ['Πριν το βάλετε, ρωτήστε όποιον το πιάνει πιο συχνά: ' + r.players]); });
     }
-    if (ok(fm)) {
-      const total = fm.data.reduce((x, r) => x + r.fails, 0);
-      const tops = fm.data.filter(r => r.fails === fm.data[0].fails);
-      const parts = [];
-      tops.forEach((r, i) => { const w = 'market=' + encodeURIComponent(r.market);
-        if (i) parts.push(i === tops.length - 1 ? ' και ' : ', ');
-        parts.push(B('fail_markets', 'market', w, r.market), ' (', B('fail_markets', 'fails', w, String(r.fails)), ')'); });
-      add('info', 'i', ['Τα περισσότερα λάθη μας ήρθαν από ', ...parts, ` σε σύνολο ${total} λαθών.`], [tops.length > 1 ? 'Δείτε πιο προσεκτικά αυτές τις αγορές πριν το επόμενο δελτίο.' : 'Δείτε πιο προσεκτικά αυτή την αγορά πριν το επόμενο δελτίο.']);
-    }
-    if (!ul.children.length) add('info', 'i', ['Μόλις μαζευτούν περισσότερα σημεία θα εμφανιστούν εδώ συμβουλές για το επόμενο δελτίο.'], null);
+    if (!ul.children.length) add('info', 'i', ['Μόλις μαζευτούν περισσότερα παιχνίδια θα εμφανιστούν εδώ συμβουλές για το επόμενο δελτίο.'], null);
   }
 
   function smallTable(tbody, res, keyField) {
     if (res.status === 'ok' && res.data.length) {
       tbody.textContent = '';
-      res.data.forEach(r => tbody.appendChild(el('tr', r.selections < 3 ? 'small' : '', [el('td', 'l nm', [r[keyField]]), el('td', '', [String(r.won)]), el('td', '', [String(r.selections)]), rateCell(r.rate)])));
-    } else empty(tbody, 4, 'Δεν υπάρχουν ακόμα δεδομένα.');
+      res.data.forEach(r => tbody.appendChild(el('tr', r.selections < 5 ? 'small' : '', [el('td', 'l nm', [r[keyField]]), el('td', '', [String(r.won)]), el('td', '', [String(r.selections)]),
+        rateCell(r.rate), el('td', 'exp', [r.expected === undefined ? '—' : pct(r.expected)])])));
+    } else empty(tbody, 5, 'Δεν υπάρχουν ακόμα δεδομένα.');
   }
 
   document.querySelectorAll('.br-nav a').forEach(a => a.addEventListener('click', ev => {
@@ -836,7 +877,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
       $('b-pct').textContent = '(' + pct(lw.hit / lw.total) + ')';
       $('board-d').textContent = range(lw.weekend, true);
       $('b-take').textContent = lw.all_hit ? `Πιάσαμε όλοι! Το ομαδικό έδωσε ${eur(lw.payout)}.`
-        : `Το ομαδικό χάθηκε για ${lw.fails} ${lw.fails === 1 ? 'σημείο' : 'σημεία'}. Αν έβγαινε, θα έδινε ${eur(10 * lw.combo_odds)} με 10€.`;
+        : `Το ομαδικό χάθηκε για ${lw.fails} ${lw.fails === 1 ? 'σημείο' : 'σημεία'}. Αν έβγαιναν και τα 5 κουπόνια, με 10€ θα παίρναμε ${eur(10 * lw.combo_odds)} (απόδοση ${bigOdds(lw.combo_odds)}).`;
       all.filter(x => !x.test && x.weekend === lw.weekend).sort(byPlayer).forEach(r => {
         const wn = r.status === WON;
         slots.appendChild(el('div', 'br-slot ' + (wn ? 'w' : 'l'), [el('div', 'ic', [wn ? '✓' : '✗']), el('div', 'nm', [r.player]), el('div', 'od', ['@' + odds(r.odds)])], { title: `${r.player}: ${r.status}, ${r.picks_won}/${r.picks} σημεία` }));
@@ -851,7 +892,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
     const mb = $('mk-body');
     if (mkt.status === 'ok' && mkt.data.length) {
       mb.textContent = '';
-      mkt.data.forEach(r => mb.appendChild(el('tr', r.legs < 3 ? 'small' : '', [el('td', 'l nm', [r.market]), el('td', '', [String(r.won)]), el('td', '', [String(r.legs)]),
+      mkt.data.forEach(r => mb.appendChild(el('tr', r.legs < 3 ? 'small' : '', [el('td', 'l nm', [r.market, el('div', 'who-s', [r.players])]), el('td', '', [String(r.won)]), el('td', '', [String(r.legs)]),
         rateCell(r.rate), el('td', 'who', [r.players])])));
     } else empty(mb, 5, 'Δεν υπάρχουν ακόμα σημεία.');
     smallTable($('st2-body'), sty, 'sel_type');
@@ -866,7 +907,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
         fb.appendChild(el('div', 'br-fail', [mk('fail_markets', 'market', w, r.market, 'nm'), el('span', 'tr', [el('i', '', [], { style: { width: Math.round(r.fails / mx * 100) + '%' } })]),
           el('span', 'n', [mk('fail_markets', 'fails', w, String(r.fails)), ' ', el('small', '', [mk('fail_markets', 'share', w, '(' + pct(r.share) + ')')])])])); });
     } else fb.appendChild(el('div', 'empty', ['Δεν υπάρχουν ακόμα λάθος σημεία.']));
-    renderTips(mkt, ob, sty, bbs, cs, fm);
+    renderTips(dash.data('pickers'), mkt, ob, sty, bbs, fm);
 
     // rounds
     const rb = $('rounds-box'); rb.textContent = '';
@@ -881,8 +922,8 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
     const ch = $('chart'), ch2 = $('chart2');
     if (tw.status === 'ok') {
       drawBars(ch, tw.data, { total: r => r.total, hit: r => r.hit, gold: r => r.all_hit,
-        tip: r => [`Κουπόνια: ${r.hit}/${r.total} (${pct(r.hit / r.total)})` + (r.all_hit ? ', πιάσαμε όλοι' : ''), `Απόδοση ομαδικού: ${bigOdds(r.combo_odds)}`,
-          r.all_hit ? `Κέρδος: ${eur(r.payout)}` : `Θα έδινε ${eur(10 * r.combo_odds)} με 10€`] });
+        tip: r => [`Κουπόνια: ${r.hit}/${r.total} (${pct(r.hit / r.total)})` + (r.all_hit ? ', πιάσαμε όλοι' : ''), `Απόδοση 5 κουπονιών μαζί: ${bigOdds(r.combo_odds)}`,
+          r.all_hit ? `Κέρδος: ${eur(r.payout)}` : `Με 10€ θα έδινε ${eur(10 * r.combo_odds)}`] });
       drawBars(ch2, tw.data, { total: r => r.picks, hit: r => r.picks_won,
         tip: r => [`Σημεία: ${r.picks_won}/${r.picks} (${pct(r.picks_won / r.picks)})`, `Λάθος σημεία: ${r.fails}`] });
     } else { ch.textContent = ''; ch2.textContent = ''; }
