@@ -244,6 +244,10 @@ html,body{background:#ece9f3!important}@media (prefers-color-scheme: dark){html,
 .br-round-say b { font-weight: 800; }
 .br-round.gold .br-round-say { background: color-mix(in srgb, var(--gold) 14%, transparent); }
 /* standings */
+.br .rk { display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 6px; font-weight: 800; font-size: .78rem; background: var(--color-panel); border: 1px solid var(--line); }
+.br tr.r1 .rk { background: var(--gold); color: #1a1300; border-color: transparent; }
+.br tr.r2 .rk { background: #9aa3ad; color: #111; border-color: transparent; }
+.br tr.r3 .rk { background: #b0703c; color: #1a0d00; border-color: transparent; }
 .br-fold > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .br-fold > summary::-webkit-details-marker { display: none; }
 .br-fold > summary .tg { font-size: .78rem; color: var(--win); font-weight: 700; }
@@ -324,22 +328,25 @@ html,body{background:#ece9f3!important}@media (prefers-color-scheme: dark){html,
   </section>
 
   <section class="br-sec" id="standings">
-    <div class="br-h"><h2>Η πορεία του καθενός</h2><p>Για να βλέπει ο καθένας πού βρίσκεται και τι μπορεί να βελτιώσει. Είμαστε ομάδα.</p></div>
-    <div class="br-scroll">
-      <table data-source="standings" data-row-key="player">
-        <thead><tr>
-          <th data-field="player" class="l">Παίκτης</th>
-          <th data-field="coupons">Κουπόνια</th>
-          <th data-field="won">Σωστά</th>
-          <th data-field="lost">Λάθος</th>
-          <th data-field="pick_rate">Σημεία</th>
-          <th data-field="form" class="hide-s">Φόρμα</th>
-          <th data-field="profit">Μονάδες</th>
-        </tr></thead>
-        <tbody id="st-body"></tbody>
-      </table>
-    </div>
-    <p class="br-foot">Σημεία: πόσα σημεία βγήκαν από όσα έπαιξε. Μονάδες: πόσο θα είχε κερδίσει αν έπαιζε μόνος του 1 μονάδα σε κάθε κουπόνι (κερδισμένο = απόδοση − 1, χαμένο = −1).</p>
+    <details class="br-fold">
+      <summary><div class="br-h" style="margin:0"><h2>Η πορεία του καθενός</h2><p>Για να βλέπει ο καθένας πού βρίσκεται και τι μπορεί να βελτιώσει. Είμαστε ομάδα.</p></div><span class="tg">Άνοιγμα</span></summary>
+      <div class="br-scroll">
+        <table data-source="standings" data-row-key="player">
+          <thead><tr>
+            <th data-field="rank" class="l">Θέση</th>
+            <th data-field="player" class="l">Παίκτης</th>
+            <th data-field="coupons">Κουπόνια</th>
+            <th data-field="won">Σωστά</th>
+            <th data-field="lost">Λάθος</th>
+            <th data-field="pick_rate">Σημεία</th>
+            <th data-field="form" class="hide-s">Φόρμα</th>
+            <th data-field="profit">Μονάδες</th>
+          </tr></thead>
+          <tbody id="st-body"></tbody>
+        </table>
+      </div>
+      <p class="br-foot">Βαθμολογία με βάση τις μονάδες. Σε ισοβαθμία μετράνε τα σωστά κουπόνια και μετά τα σημεία. Σημεία: πόσα σημεία βγήκαν από όσα έπαιξε. Μονάδες: πόσο θα είχε κερδίσει αν έπαιζε μόνος του 1 μονάδα σε κάθε κουπόνι (κερδισμένο = απόδοση − 1, χαμένο = −1).</p>
+    </details>
   </section>
 
   <section class="br-sec" id="learn">
@@ -660,7 +667,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
 
   dash.calc('standings', {
     title: 'Η πορεία του καθενός',
-    description: 'Ανά παίκτη (επίσημες αγωνιστικές), με σταθερή σειρά: κουπόνια, σωστά, λάθος, σημεία που βγήκαν, φόρμα των 5 τελευταίων και μονάδες με 1 μονάδα ανά κουπόνι (κερδισμένο = απόδοση − 1, χαμένο = −1).',
+    description: 'Ανά παίκτη (επίσημες αγωνιστικές), με θέση στη βαθμολογία κατά μονάδες (σε ισοβαθμία: σωστά κουπόνια, μετά σημεία): κουπόνια, σωστά, λάθος, σημεία που βγήκαν, φόρμα των 5 τελευταίων και μονάδες με 1 μονάδα ανά κουπόνι (κερδισμένο = απόδοση − 1, χαμένο = −1).',
     inputs: ['players', 'coupons'],
     fn: (players, coupons) => {
       const done = coupons.filter(x => x.id !== 'template' && !x.test);
@@ -673,7 +680,8 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
         return { player: p.player, coupons: c.length, won: won, lost: c.length - won, picks: picks, picks_won: picksWon,
           pick_rate: picks ? picksWon / picks : null, form: c.slice(-5).map(x => x.status === 'Κέρδισε' ? 'Σ' : 'Λ').join(''),
           profit: Math.round(profit * 100) / 100 };
-      });
+      }).sort((a, b) => b.profit - a.profit || b.won - a.won || (b.pick_rate || 0) - (a.pick_rate || 0) || a.player.localeCompare(b.player))
+        .map((r, i) => Object.assign({ rank: i + 1 }, r));
     }
   });
 
@@ -982,11 +990,11 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
     if (st.status === 'ok') {
       sb.textContent = '';
       st.data.forEach(r => { const fm = formBadges(r.form);
-        sb.appendChild(el('tr', '', [el('td', 'l', [dot(r.player), el('span', 'nm', [r.player])]),
+        sb.appendChild(el('tr', r.coupons && r.rank <= 3 ? 'r' + r.rank : '', [el('td', 'l', [el('span', 'rk', [String(r.rank)])]), el('td', 'l', [dot(r.player), el('span', 'nm', [r.player])]),
           el('td', '', [String(r.coupons)]), el('td', '', [String(r.won)]), el('td', '', [String(r.lost)]),
           el('td', '', [r.pick_rate === null ? '—' : `${r.picks_won}/${r.picks} (${pct(r.pick_rate)})`]), el('td', 'hide-s', [fm]),
           el('td', 'nm ' + sign(r.profit), [units(r.profit)])])); });
-    } else empty(sb, 7, '—');
+    } else empty(sb, 8, '—');
 
     document.querySelectorAll('.br-fold').forEach(fold => { if (!fold.dataset.wired) { fold.dataset.wired = '1';
       fold.addEventListener('toggle', () => { fold.querySelector('.tg').textContent = fold.open ? 'Κλείσιμο' : 'Άνοιγμα'; }); } });
