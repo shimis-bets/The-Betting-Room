@@ -245,7 +245,7 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
     <a href="#rounds" data-go="rounds">Αγωνιστικές</a>
     <a href="#weeks" data-go="weeks">Πορεία</a>
     <a href="#tests" data-go="tests">Test bets</a>
-    <a href="#standings" data-go="standings">Βαθμολογία</a>
+    <a href="#standings" data-go="standings">Πορεία καθενός</a>
   </nav>
 
   <section class="br-sec" id="players">
@@ -334,23 +334,22 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
   </section>
 
   <section class="br-sec" id="standings">
-    <details class="br-fold">
-      <summary><div class="br-h" style="margin:0"><h2>Βαθμολογία</h2><p>Για όταν θέλουμε και λίγο ανταγωνισμό</p></div><span class="tg">Εμφάνιση</span></summary>
-      <div class="br-scroll">
-        <table data-source="standings" data-row-key="player">
-          <thead><tr>
-            <th data-field="rank" class="l">#</th>
-            <th data-field="player" class="l">Παίκτης</th>
-            <th data-field="coupons">Κουπόνια</th>
-            <th data-field="won">Σωστά</th>
-            <th data-field="lost">Λάθος</th>
-            <th data-field="profit">Μονάδες</th>
-          </tr></thead>
-          <tbody id="st-body"></tbody>
-        </table>
-      </div>
-      <p class="br-foot">Μονάδες: 1 μονάδα σε κάθε κουπόνι. Κερδισμένο = απόδοση − 1, χαμένο = −1.</p>
-    </details>
+    <div class="br-h"><h2>Η πορεία του καθενός</h2><p>Για να βλέπει ο καθένας πού βρίσκεται και τι μπορεί να βελτιώσει. Είμαστε ομάδα.</p></div>
+    <div class="br-scroll">
+      <table data-source="standings" data-row-key="player">
+        <thead><tr>
+          <th data-field="player" class="l">Παίκτης</th>
+          <th data-field="coupons">Κουπόνια</th>
+          <th data-field="won">Σωστά</th>
+          <th data-field="lost">Λάθος</th>
+          <th data-field="pick_rate">Σημεία</th>
+          <th data-field="form" class="hide-s">Φόρμα</th>
+          <th data-field="profit">Μονάδες</th>
+        </tr></thead>
+        <tbody id="st-body"></tbody>
+      </table>
+    </div>
+    <p class="br-foot">Σημεία: πόσα σημεία βγήκαν από όσα έπαιξε. Μονάδες: πόσο θα είχε κερδίσει αν έπαιζε μόνος του 1 μονάδα σε κάθε κουπόνι (κερδισμένο = απόδοση − 1, χαμένο = −1).</p>
   </section>
 </div>
 
@@ -579,25 +578,27 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
   });
 
   dash.calc('standings', {
-    title: 'Βαθμολογία',
-    description: 'Ανά παίκτη (επίσημες αγωνιστικές): κουπόνια, σωστά, λάθος και μονάδες με 1 μονάδα ανά κουπόνι.',
+    title: 'Η πορεία του καθενός',
+    description: 'Ανά παίκτη (επίσημες αγωνιστικές), με σταθερή σειρά: κουπόνια, σωστά, λάθος, σημεία που βγήκαν, φόρμα των 5 τελευταίων και μονάδες με 1 μονάδα ανά κουπόνι (κερδισμένο = απόδοση − 1, χαμένο = −1).',
     inputs: ['players', 'coupons'],
     fn: (players, coupons) => {
       const done = coupons.filter(x => x.id !== 'template' && !x.test);
-      const rows = players.map(p => {
-        const c = done.filter(x => x.player === p.player);
+      return players.map(p => {
+        const c = done.filter(x => x.player === p.player).sort((a, b) => String(a.weekend).localeCompare(String(b.weekend)));
         const won = c.filter(x => x.status === 'Κέρδισε').length;
+        const picks = c.reduce((s, x) => s + Number(x.picks), 0);
+        const picksWon = c.reduce((s, x) => s + Number(x.picks_won), 0);
         const profit = c.reduce((s, x) => s + (x.status === 'Κέρδισε' ? Number(x.odds) - 1 : -1), 0);
-        return { player: p.player, coupons: c.length, won: won, lost: c.length - won, profit: Math.round(profit * 100) / 100 };
+        return { player: p.player, coupons: c.length, won: won, lost: c.length - won, picks: picks, picks_won: picksWon,
+          pick_rate: picks ? picksWon / picks : null, form: c.slice(-5).map(x => x.status === 'Κέρδισε' ? 'Σ' : 'Λ').join(''),
+          profit: Math.round(profit * 100) / 100 };
       });
-      rows.sort((a, b) => b.profit - a.profit || b.won - a.won || a.player.localeCompare(b.player));
-      return rows.map((r, i) => Object.assign({ rank: i + 1 }, r));
     }
   });
 
   const WON = 'Κέρδισε';
   const pct = d3.format('.0%');
-  const units = v => (v > 0 ? '+' : '') + d3.format('.2f')(v);
+  const units = v => (v > 0 ? '+' : v < 0 ? '−' : '') + d3.format('.2f')(Math.abs(v));
   const odds = v => (v === null || v === undefined || v === '') ? '—' : d3.format('.2f')(Number(v));
   const money = (v, signed) => { const s = new Intl.NumberFormat('el', { maximumFractionDigits: Number.isInteger(v) ? 0 : 2, minimumFractionDigits: Number.isInteger(v) ? 0 : 2 }).format(Math.abs(v)) + '€';
     return (signed ? (v < 0 ? '−' : v > 0 ? '+' : '') : (v < 0 ? '−' : '')) + s; };
@@ -899,12 +900,12 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
     const sb = $('st-body');
     if (st.status === 'ok') {
       sb.textContent = '';
-      st.data.forEach(r => sb.appendChild(el('tr', '', [el('td', 'l', [String(r.rank)]), el('td', 'l', [dot(r.player), el('span', 'nm', [r.player])]),
-        el('td', '', [String(r.coupons)]), el('td', '', [String(r.won)]), el('td', '', [String(r.lost)]),
-        el('td', 'nm ' + sign(r.profit), [units(r.profit)])])));
-    } else empty(sb, 6, '—');
-    const fold = document.querySelector('.br-fold');
-    if (fold && !fold.dataset.wired) { fold.dataset.wired = '1'; fold.addEventListener('toggle', () => { fold.querySelector('.tg').textContent = fold.open ? 'Απόκρυψη' : 'Εμφάνιση'; }); }
+      st.data.forEach(r => { const fm = formBadges(r.form);
+        sb.appendChild(el('tr', '', [el('td', 'l', [dot(r.player), el('span', 'nm', [r.player])]),
+          el('td', '', [String(r.coupons)]), el('td', '', [String(r.won)]), el('td', '', [String(r.lost)]),
+          el('td', '', [r.pick_rate === null ? '—' : `${r.picks_won}/${r.picks} (${pct(r.pick_rate)})`]), el('td', 'hide-s', [fm]),
+          el('td', 'nm ' + sign(r.profit), [units(r.profit)])])); });
+    } else empty(sb, 7, '—');
 
     if (!linked && tw.status === 'ok') {
       linked = true;
