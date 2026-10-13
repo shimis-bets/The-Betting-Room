@@ -678,7 +678,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
   const money = (v, signed) => { const s = new Intl.NumberFormat('el', { maximumFractionDigits: Number.isInteger(v) ? 0 : 2, minimumFractionDigits: Number.isInteger(v) ? 0 : 2 }).format(Math.abs(v)) + '€';
     return (signed ? (v < 0 ? '−' : v > 0 ? '+' : '') : (v < 0 ? '−' : '')) + s; };
   const eur = v => money(Math.abs(v) >= 100 ? Math.round(v) : Math.round(v * 100) / 100);
-  const bigOdds = v => v >= 100 ? d3.format('.0f')(v) : d3.format('.2f')(v);
+  const bigOdds = v => (Math.round(Number(v) * 100) / 100).toFixed(2);
   const toDate = s => new Date(String(s).slice(0, 10) + 'T00:00:00Z');
   let ENDS = {};
   const mon = new Intl.DateTimeFormat('el', { month: 'short', timeZone: 'UTC' });
