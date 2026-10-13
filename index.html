@@ -338,12 +338,12 @@ html,body{background:#ece9f3!important}@media (prefers-color-scheme: dark){html,
             <th data-field="lost">Λάθος</th>
             <th data-field="pick_rate">Σημεία</th>
             <th data-field="form" class="hide-s">Φόρμα</th>
-            <th data-field="profit">Μονάδες</th>
+            <th data-field="points">Πόντοι</th>
           </tr></thead>
           <tbody id="st-body"></tbody>
         </table>
       </div>
-      <p class="br-foot">Βαθμολογία με βάση τα σωστά κουπόνια. Σε ισοβαθμία μετράει το ποσοστό σημείων και μετά οι μονάδες. Σημεία: πόσα σημεία βγήκαν από όσα έπαιξε. Μονάδες: πόσο θα είχε κερδίσει αν έπαιζε μόνος του 1 μονάδα σε κάθε κουπόνι (κερδισμένο = απόδοση − 1, χαμένο = −1).</p>
+      <p class="br-foot">Βαθμολογία με βάση τα σωστά κουπόνια. Σε ισοβαθμία μετράει το ποσοστό σημείων. Σημεία: πόσα σημεία βγήκαν από όσα έπαιξε. Πόντοι: σωστό κουπόνι +1, χαμένο −1.</p>
     </details>
   </section>
 
@@ -665,7 +665,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
 
   dash.calc('standings', {
     title: 'Η πορεία του καθενός',
-    description: 'Ανά παίκτη (επίσημες αγωνιστικές), με θέση στη βαθμολογία κατά σωστά κουπόνια (σε ισοβαθμία: ποσοστό σημείων, μετά μονάδες): κουπόνια, σωστά, λάθος, σημεία που βγήκαν, φόρμα των 5 τελευταίων και μονάδες με 1 μονάδα ανά κουπόνι (κερδισμένο = απόδοση − 1, χαμένο = −1).',
+    description: 'Ανά παίκτη (επίσημες αγωνιστικές): κουπόνια, σωστά, λάθος, σημεία που βγήκαν, φόρμα των 5 τελευταίων και πόντοι (σωστό κουπόνι +1, χαμένο −1). Θέση κατά σωστά κουπόνια, σε ισοβαθμία κατά ποσοστό σημείων.',
     inputs: ['players', 'coupons'],
     fn: (players, coupons) => {
       const done = coupons.filter(x => x.id !== 'template' && !x.test);
@@ -674,11 +674,10 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
         const won = c.filter(x => x.status === 'Κέρδισε').length;
         const picks = c.reduce((s, x) => s + Number(x.picks), 0);
         const picksWon = c.reduce((s, x) => s + Number(x.picks_won), 0);
-        const profit = c.reduce((s, x) => s + (x.status === 'Κέρδισε' ? Number(x.odds) - 1 : -1), 0);
         return { player: p.player, coupons: c.length, won: won, lost: c.length - won, picks: picks, picks_won: picksWon,
           pick_rate: picks ? picksWon / picks : null, form: c.slice(-5).map(x => x.status === 'Κέρδισε' ? 'Σ' : 'Λ').join(''),
-          profit: Math.round(profit * 100) / 100 };
-      }).sort((a, b) => b.won - a.won || (b.pick_rate || 0) - (a.pick_rate || 0) || b.profit - a.profit || a.player.localeCompare(b.player))
+          points: won - (c.length - won) };
+      }).sort((a, b) => b.won - a.won || (b.pick_rate || 0) - (a.pick_rate || 0) || b.points - a.points || a.player.localeCompare(b.player))
         .map((r, i) => Object.assign({ rank: i + 1 }, r));
     }
   });
@@ -991,7 +990,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
         sb.appendChild(el('tr', '', [el('td', 'l', [el('span', 'rk', [String(r.rank)])]), el('td', 'l', [dot(r.player), el('span', 'nm', [r.player])]),
           el('td', '', [String(r.coupons)]), el('td', '', [String(r.won)]), el('td', '', [String(r.lost)]),
           el('td', '', [r.pick_rate === null ? '—' : `${r.picks_won}/${r.picks} (${pct(r.pick_rate)})`]), el('td', 'hide-s', [fm]),
-          el('td', 'nm ' + sign(r.profit), [units(r.profit)])])); });
+          el('td', 'nm ' + sign(r.points), [(r.points > 0 ? '+' : r.points < 0 ? '−' : '') + Math.abs(r.points)])])); });
     } else empty(sb, 8, '—');
 
     document.querySelectorAll('.br-fold').forEach(fold => { if (!fold.dataset.wired) { fold.dataset.wired = '1';
