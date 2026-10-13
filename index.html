@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="el"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Betting Room</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--font-anthropic-sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+--color-bg:#ffffff;--color-panel:#f6f7f8;--color-fg:#16181b;--color-fg-muted:#62676f;--color-border-line:#e3e5e8;
+--color-ok:#16a34a;--color-bad:#dc2626;--color-warn:#d97706;
+--cds-font-size-caption:.8rem;--cds-font-size-body:.95rem;--cds-font-size-heading:1.15rem;
+--cds-gap-lg:18px;--cds-radius:10px;--cds-pad-xs:4px;--cds-pad-sm:8px;--cds-dur-slow:.25s;
+--cds-chart-grid:#eceef0;--cds-chart-muted:#9aa1aa;--cds-chart-reference:#b6bcc4;
+--cds-surface-popover:#ffffff;--cds-border:#e3e5e8;--cds-shadow-popover:0 6px 20px rgba(0,0,0,.12);--cds-text-secondary:#62676f}
+@media (prefers-color-scheme: dark){:root{--color-bg:#141518;--color-panel:#1c1e22;--color-fg:#eceef1;--color-fg-muted:#9aa1ab;--color-border-line:#2c2f35;
+--color-ok:#22c55e;--color-bad:#f05252;--color-warn:#f59e0b;--cds-chart-grid:#26292e;--cds-chart-muted:#6b727c;--cds-chart-reference:#4a5059;
+--cds-surface-popover:#202328;--cds-border:#33363c;--cds-shadow-popover:0 6px 20px rgba(0,0,0,.45);--cds-text-secondary:#9aa1ab}}
+html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:var(--font-anthropic-sans);-webkit-text-size-adjust:100%}
+#dash-root{padding:16px clamp(12px,3vw,32px) 40px}
+</style>
+<style>
+#dash-root { --dash-gutter: clamp(12px, 3vw, 32px); }
+.br { --win: var(--color-ok); --loss: var(--color-bad); --wait: var(--color-warn); --gold: #c9971c;
+  --line: var(--color-border-line); --muted: var(--color-fg-muted);
+  font-family: var(--font-anthropic-sans); font-variant-numeric: tabular-nums; max-width: 960px; margin-inline: auto;
+  display: flex; flex-direction: column; gap: var(--cds-gap-lg); line-height: 1.45; }
+.br h1, .br h2, .br h3, .br p { margin: 0; }
+.br :focus-visible { outline: 2px solid var(--win); outline-offset: 2px; border-radius: 4px; }
+
+/* ---------- hero: the scoreboard ---------- */
+.br-hero { background: var(--color-panel); border: 1px solid var(--line); border-radius: 14px; padding: clamp(16px, 4vw, 28px); display: flex; flex-direction: column; gap: 18px; }
+.br-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.br-title { font-size: clamp(1.7rem, 5.5vw, 2.6rem); font-weight: 800; letter-spacing: -.02em; line-height: 1; }
+.br-season { color: var(--muted); font-size: var(--cds-font-size-caption); margin-top: 6px; }
+.br-board { border-radius: 12px; background: var(--color-bg); border: 1px solid var(--line); padding: 14px; }
+.br-board-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.br-board-h h2 { font-size: var(--cds-font-size-body); font-weight: 800; }
+.br-board-h span { color: var(--muted); font-size: var(--cds-font-size-caption); }
+.br-score { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+.br-score b { font-size: clamp(2.6rem, 9vw, 3.6rem); font-weight: 800; line-height: .9; letter-spacing: -.03em; }
+.br-score b small { font-size: .45em; color: var(--muted); font-weight: 700; letter-spacing: 0; }
+.br-score p { color: var(--muted); font-size: var(--cds-font-size-caption); max-width: 30rem; }
+.br-slots { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.br-slot { border-radius: 10px; padding: 9px 6px 8px; text-align: center; border: 1px solid var(--line); min-width: 0; }
+.br-slot.w { background: color-mix(in srgb, var(--win) 16%, transparent); border-color: color-mix(in srgb, var(--win) 45%, transparent); }
+.br-slot.l { background: color-mix(in srgb, var(--loss) 10%, transparent); border-color: color-mix(in srgb, var(--loss) 35%, transparent); }
+.br-slot .ic { font-size: 1.15rem; font-weight: 800; line-height: 1; }
+.br-slot.w .ic { color: var(--win); } .br-slot.l .ic { color: var(--loss); }
+.br-slot .nm { font-weight: 700; font-size: .78rem; margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.br-slot .od { color: var(--muted); font-size: .7rem; }
+.br-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.br-kpi { padding: 2px 0 0 10px; border-left: 2px solid var(--line); min-width: 0; }
+.br-kpi .v { font-size: clamp(1.15rem, 4vw, 1.5rem); font-weight: 800; line-height: 1.15; }
+.br-kpi .l { color: var(--muted); font-size: .74rem; }
+.br .pos { color: var(--win); } .br .neg { color: var(--loss); }
+
+/* ---------- nav ---------- */
+.br-nav { position: sticky; top: 0; z-index: 5; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 8px 0;
+  background: color-mix(in srgb, var(--color-bg) 88%, transparent); backdrop-filter: blur(6px); margin-block: -8px; }
+.br-nav::-webkit-scrollbar { display: none; }
+.br-nav a { flex: none; text-decoration: none; color: var(--color-fg); font-size: .82rem; font-weight: 600; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--color-panel); }
+.br-nav a:hover { border-color: var(--win); }
+
+/* ---------- sections ---------- */
+.br-sec { background: var(--color-panel); border: 1px solid var(--line); border-radius: 14px; padding: clamp(14px, 3.5vw, 22px); min-width: 0; scroll-margin-top: 56px; }
+.br-h { margin-bottom: 14px; }
+.br-h h2 { font-size: var(--cds-font-size-heading); font-weight: 800; letter-spacing: -.01em; }
+.br-h p { color: var(--muted); font-size: var(--cds-font-size-caption); margin-top: 2px; max-width: 46rem; }
+.br-foot { color: var(--muted); font-size: .74rem; margin-top: 12px; }
+
+/* tables */
+.br-scroll { overflow-x: auto; }
+.br table { width: 100%; border-collapse: collapse; }
+.br th { font-size: .74rem; font-weight: 600; color: var(--muted); text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.br td { text-align: right; padding: 9px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; font-size: var(--cds-font-size-body); }
+.br th.l, .br td.l { text-align: left; }
+.br tbody tr:last-child td { border-bottom: none; }
+.br .nm { font-weight: 700; }
+.br .mut { color: var(--muted); font-size: .78rem; }
+.br .dot { display: inline-block; width: .55rem; height: .55rem; border-radius: 50%; margin-right: .45rem; vertical-align: middle; flex: none; }
+.br .empty { color: var(--muted); font-size: var(--cds-font-size-caption); padding: 18px 0; text-align: center; }
+
+/* rate bar */
+.br .rate { display: inline-flex; align-items: center; gap: 8px; justify-content: flex-end; width: 100%; }
+.br .rate .tr { flex: 1; min-width: 44px; max-width: 120px; height: 7px; border-radius: 4px; background: color-mix(in srgb, var(--color-fg) 8%, transparent); overflow: hidden; }
+.br .rate .tr i { display: block; height: 100%; border-radius: 4px; }
+.br .rate span { min-width: 2.7em; font-weight: 800; }
+.br .t-good { color: var(--win); } .br .t-mid { color: var(--wait); } .br .t-bad { color: var(--loss); }
+.br .b-good { background: var(--win); } .br .b-mid { background: var(--wait); } .br .b-bad { background: var(--loss); }
+.br tr.small td { opacity: .55; }
+
+/* chips */
+.br .chip { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .74rem; font-weight: 700; }
+.br .chip.w { background: color-mix(in srgb, var(--win) 16%, transparent); color: var(--win); }
+.br .chip.l { background: color-mix(in srgb, var(--loss) 14%, transparent); color: var(--loss); }
+.br .form { display: inline-flex; gap: 3px; }
+.br .form i { display: inline-flex; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem; border-radius: 4px; font-size: .66rem; font-weight: 800; color: #fff; font-style: normal; }
+.br .form i.w { background: var(--win); } .br .form i.l { background: var(--loss); }
+
+/* ---------- player cards ---------- */
+.br-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 16.5rem), 1fr)); gap: 12px; }
+.br-card { border: 1px solid var(--line); border-radius: 12px; background: var(--color-bg); padding: 14px; display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden; }
+.br-card::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--c); }
+.br-card-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.br-card-h .n { font-weight: 800; font-size: 1.12rem; line-height: 1.1; }
+.br-meters { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.br-meter .top { display: flex; justify-content: space-between; align-items: baseline; }
+.br-meter .v { font-size: 1.45rem; font-weight: 800; line-height: 1; }
+.br-meter .c { color: var(--muted); font-size: .74rem; }
+.br-meter .l { color: var(--muted); font-size: .74rem; margin-top: 2px; }
+.br-meter .tr { height: 6px; border-radius: 3px; background: color-mix(in srgb, var(--color-fg) 8%, transparent); overflow: hidden; margin-top: 6px; }
+.br-meter .tr i { display: block; height: 100%; border-radius: 3px; background: var(--c); }
+.br-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; border-top: 1px solid var(--line); padding-top: 10px; }
+.br-facts div { min-width: 0; }
+.br-facts .v { font-weight: 800; }
+.br-facts .l { color: var(--muted); font-size: .7rem; }
+.br-sw { display: flex; flex-direction: column; gap: 6px; }
+.br-sw div { display: flex; align-items: center; gap: 8px; font-size: .84rem; }
+.br-sw .k { color: var(--muted); font-size: .74rem; min-width: 7.6em; }
+.br-sw .m { font-weight: 700; flex: 1; min-width: 0; }
+.br-sw .s { font-size: .74rem; font-weight: 700; }
+.br-note { font-size: .78rem; color: var(--color-fg); background: color-mix(in srgb, var(--wait) 12%, transparent); border-radius: 8px; padding: 7px 10px; }
+
+/* ---------- learn ---------- */
+.br-take { font-size: var(--cds-font-size-body); margin-bottom: 14px; padding: 10px 12px; border-radius: 10px; background: var(--color-bg); border: 1px solid var(--line); }
+.br-take b { font-weight: 800; }
+.br-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 12px; margin-top: 16px; }
+.br-sub { border: 1px solid var(--line); border-radius: 12px; background: var(--color-bg); padding: 12px 14px; min-width: 0; }
+.br-sub h3 { font-size: var(--cds-font-size-body); font-weight: 800; }
+.br-sub p { color: var(--muted); font-size: .76rem; margin: 2px 0 6px; }
+.br-key { display: flex; flex-wrap: wrap; gap: 12px; color: var(--muted); font-size: .74rem; margin-top: 10px; }
+.br-key span { display: inline-flex; align-items: center; gap: 5px; }
+.br-key i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+.br-tips { list-style: none; padding: 0; margin: 0 0 18px; display: flex; flex-direction: column; gap: 8px; }
+.br-tips li { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 10px; background: var(--color-bg); border: 1px solid var(--line); font-size: .9rem; }
+.br-tips li .ic { flex: none; width: 1.5rem; height: 1.5rem; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: .8rem; color: #fff; margin-top: 1px; }
+.br-tips li.good .ic { background: var(--win); } .br-tips li.bad .ic { background: var(--loss); } .br-tips li.info .ic { background: var(--wait); }
+.br-tips li b { font-weight: 800; }
+.br-tips li .why { display: block; color: var(--muted); font-size: .78rem; margin-top: 2px; }
+.br-h3 { font-size: var(--cds-font-size-body); font-weight: 800; margin: 18px 0 8px; }
+.br-p { color: var(--muted); font-size: .76rem; margin: -4px 0 8px; }
+.br td.who { white-space: normal; text-align: left; color: var(--muted); font-size: .76rem; min-width: 9rem; }
+.br-fails { display: flex; flex-direction: column; gap: 6px; }
+.br-fail { display: grid; grid-template-columns: minmax(7rem, 11rem) 1fr auto; gap: 10px; align-items: center; font-size: .84rem; }
+.br-fail .tr { height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--color-fg) 7%, transparent); overflow: hidden; }
+.br-fail .tr i { display: block; height: 100%; background: var(--loss); border-radius: 5px; }
+.br-fail .n { font-weight: 800; min-width: 5.5em; text-align: right; }
+.br-fail .n small { color: var(--muted); font-weight: 600; }
+/* ---------- chart ---------- */
+.br-chart { position: relative; min-height: 240px; }
+.br-tip { position: absolute; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius);
+  box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption);
+  pointer-events: none; display: none; white-space: nowrap; z-index: 2; }
+.br-tip-h { color: var(--cds-text-secondary); margin-bottom: 2px; }
+
+/* ---------- rounds (collapsible) ---------- */
+.br-rounds { display: flex; flex-direction: column; gap: 10px; }
+.br-round { border: 1px solid var(--line); border-radius: 12px; background: var(--color-bg); overflow: hidden; }
+.br-round > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+.br-round > summary::-webkit-details-marker { display: none; }
+.br-round > summary::after { content: ""; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin-left: auto; flex: none; transition: transform var(--cds-dur-slow); }
+.br-round[open] > summary::after { transform: rotate(225deg); }
+.br-round .ttl { font-weight: 800; }
+.br-round .dt { color: var(--muted); font-size: .76rem; }
+.br-round .pips { display: flex; gap: 3px; }
+.br-round .pips i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.br-round .pips i.w { background: var(--win); } .br-round .pips i.l { background: color-mix(in srgb, var(--loss) 70%, transparent); }
+.br-round .res { font-size: .78rem; color: var(--muted); white-space: nowrap; }
+.br-round.gold { border-color: var(--gold); }
+.br-round-b { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 12px; }
+.br-rk { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: 8px; }
+.br-rk div { background: var(--color-panel); border-radius: 8px; padding: 7px 10px; }
+.br-rk .v { font-weight: 800; font-size: 1.05rem; }
+.br-rk .l { color: var(--muted); font-size: .7rem; }
+.br-cp { border-top: 1px solid var(--line); padding-top: 10px; }
+.br-cp:first-of-type { border-top: none; padding-top: 0; }
+.br-cp-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.br-cp-h .meta { color: var(--muted); font-size: .78rem; margin-left: auto; }
+.br-legs { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+.br-lm { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: .76rem; }
+.br-lm > b { color: var(--muted); font-weight: 600; margin-right: 2px; }
+.br-leg { display: inline-flex; align-items: center; gap: 3px; padding: 1px 8px; border-radius: 999px; font-size: .73rem; font-weight: 700; border: 1px solid transparent; }
+.br-leg.ok { background: color-mix(in srgb, var(--win) 14%, transparent); color: var(--win); }
+.br-leg.no { background: color-mix(in srgb, var(--loss) 13%, transparent); color: var(--loss); }
+.br-leg.unk, .br-leg.push { border-color: var(--line); color: var(--muted); }
+
+/* standings */
+.br-fold > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.br-fold > summary::-webkit-details-marker { display: none; }
+.br-fold > summary .tg { font-size: .78rem; color: var(--win); font-weight: 700; }
+.br-fold[open] > summary { margin-bottom: 12px; }
+
+[data-dash-source-state=empty] { color: transparent; }
+[data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+@media (max-width: 560px) {
+  .br .hide-s { display: none; }
+  .br td, .br th { padding-inline: 5px; }
+  .br-slot .od { display: none; }
+  .br-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) { .br-round > summary::after { transition: none; } }
+</style>
+</head><body><div id="dash-root">
+
+<div class="br">
+  <header class="br-hero" id="top">
+    <div class="br-top">
+      <div>
+        <h1 class="br-title">The Betting Room</h1>
+        <p class="br-season" id="season" data-source="team" data-field="weeks" data-row="0">—</p>
+      </div>
+    </div>
+
+    <div class="br-board" id="board" data-source="coupons">
+      <div class="br-board-h"><h2 id="board-t">Τελευταία αγωνιστική</h2><span id="board-d"></span></div>
+      <div class="br-score">
+        <b><span id="b-hit" data-source="team" data-field="last_hit" data-row="0">—</span><small>/<span id="b-tot" data-source="team" data-field="last_total" data-row="0">—</span></small></b>
+        <p id="b-take" data-source="team" data-field="last_fails" data-row="0">—</p>
+      </div>
+      <div class="br-slots" id="slots"></div>
+    </div>
+
+    <div class="br-kpis">
+      <div class="br-kpi"><div class="v" id="k-rate" data-source="team" data-field="win_rate" data-row="0">—</div><div class="l">κουπόνια βγήκαν (<span id="k-won" data-source="team" data-field="won" data-row="0">—</span>/<span id="k-cp" data-source="team" data-field="coupons" data-row="0">—</span>)</div></div>
+      <div class="br-kpi"><div class="v" id="k-picks" data-source="team" data-field="pick_rate" data-row="0">—</div><div class="l">σημεία βγήκαν (<span id="k-pw" data-source="team" data-field="picks_won" data-row="0">—</span>/<span id="k-pt" data-source="team" data-field="picks" data-row="0">—</span>)</div></div>
+      <div class="br-kpi"><div class="v" id="k-net" data-source="team" data-field="net" data-row="0">—</div><div class="l">ταμείο (10€ / αγωνιστική)</div></div>
+    </div>
+  </header>
+
+  <nav class="br-nav" aria-label="Ενότητες">
+    <a href="#players" data-go="players">Παίκτες</a>
+    <a href="#learn" data-go="learn">Τι μας βγαίνει</a>
+    <a href="#rounds" data-go="rounds">Αγωνιστικές</a>
+    <a href="#weeks" data-go="weeks">Πορεία</a>
+    <a href="#tests" data-go="tests">Test bets</a>
+    <a href="#standings" data-go="standings">Βαθμολογία</a>
+  </nav>
+
+  <section class="br-sec" id="players">
+    <div class="br-h"><h2>Οι παίκτες</h2><p>Πώς πάει ο καθένας στις επίσημες αγωνιστικές, για να βλέπουμε πού χρειάζεται βοήθεια.</p></div>
+    <div class="br-cards" id="cards"></div>
+    <p class="br-foot">Παρά λίγο: κουπόνια που χάθηκαν για ένα μόνο σημείο. Δυνατό και αδύναμο σημείο: η αγορά με το καλύτερο και το χειρότερο ποσοστό, από 2 σημεία και πάνω.</p>
+  </section>
+
+  <section class="br-sec" id="learn">
+    <div class="br-h"><h2>Τι μας βγαίνει</h2><p>Τι λένε τα νούμερά μας για το επόμενο δελτίο. Μετράνε μόνο οι επίσημες αγωνιστικές και μόνο σημεία που επιβεβαιώθηκαν.</p></div>
+    <ul class="br-tips" id="tips" data-source="markets odds_bands sel_types bb_size coupon_size fail_markets"></ul>
+
+    <h3 class="br-h3">Ανά αγορά</h3>
+    <div class="br-scroll">
+      <table data-source="markets" data-row-key="market">
+        <thead><tr>
+          <th data-field="market" class="l">Αγορά</th>
+          <th data-field="won">Σωστά</th>
+          <th data-field="legs">Από</th>
+          <th data-field="rate">Ποσοστό</th>
+          <th data-field="players" class="l">Ποιος πώς πάει</th>
+        </tr></thead>
+        <tbody id="mk-body"></tbody>
+      </table>
+    </div>
+    <div class="br-key"><span><i class="b-good"></i>70% και πάνω</span><span><i class="b-mid"></i>50–69%</span><span><i class="b-bad"></i>κάτω από 50%</span><span>αχνές γραμμές: λιγότερα από 3 σημεία, μικρό δείγμα</span></div>
+
+    <h3 class="br-h3">Τι έριξε το ομαδικό</h3>
+    <p class="br-p">Από ποιες αγορές ήρθαν τα λάθος σημεία μας</p>
+    <div class="br-fails" id="fails" data-source="fail_markets"></div>
+
+    <div class="br-grid2">
+      <div class="br-sub">
+        <h3>Μονή επιλογή ή Bet Builder;</h3>
+        <p>Πόσες επιλογές του δελτίου βγήκαν ολόκληρες</p>
+        <table data-source="sel_types" data-row-key="sel_type">
+          <thead><tr><th data-field="sel_type" class="l">Επιλογή</th><th data-field="won">Βγήκαν</th><th data-field="selections">Από</th><th data-field="rate">Ποσοστό</th></tr></thead>
+          <tbody id="st2-body"></tbody>
+        </table>
+      </div>
+      <div class="br-sub">
+        <h3>Πόσα σημεία στο Bet Builder;</h3>
+        <p>Πόσα Bet Builder βγήκαν, ανάλογα με τα σημεία τους</p>
+        <table data-source="bb_size" data-row-key="size">
+          <thead><tr><th data-field="size" class="l">Bet Builder με</th><th data-field="won">Βγήκαν</th><th data-field="selections">Από</th><th data-field="rate">Ποσοστό</th></tr></thead>
+          <tbody id="bb-body"></tbody>
+        </table>
+      </div>
+      <div class="br-sub">
+        <h3>Πόσα ματς στο κουπόνι;</h3>
+        <p>Πόσα κουπόνια βγήκαν, ανάλογα με τα ματς τους</p>
+        <table data-source="coupon_size" data-row-key="size">
+          <thead><tr><th data-field="size" class="l">Κουπόνι με</th><th data-field="won">Βγήκαν</th><th data-field="selections">Από</th><th data-field="rate">Ποσοστό</th></tr></thead>
+          <tbody id="cs-body"></tbody>
+        </table>
+      </div>
+      <div class="br-sub">
+        <h3>Βγαίνουν οι «σίγουρες» αποδόσεις;</h3>
+        <p>Ποσοστό επιτυχίας ανά απόδοση επιλογής</p>
+        <table data-source="odds_bands" data-row-key="band">
+          <thead><tr><th data-field="band" class="l">Απόδοση</th><th data-field="won">Βγήκαν</th><th data-field="selections">Από</th><th data-field="rate">Ποσοστό</th></tr></thead>
+          <tbody id="ob-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="br-sec" id="rounds">
+    <div class="br-h"><h2>Αγωνιστικές</h2><p>Πάτα σε μια αγωνιστική για να δεις τι έπαιξε ο καθένας και τι βγήκε.</p></div>
+    <div class="br-rounds" id="rounds-box"></div>
+  </section>
+
+  <section class="br-sec" id="weeks">
+    <div class="br-h"><h2>Πορεία της ομάδας</h2><p>Πώς πάμε από αγωνιστική σε αγωνιστική.</p></div>
+    <h3 class="br-h3" style="margin-top:0">Κουπόνια</h3>
+    <p class="br-p">Ποσοστό κουπονιών που βγήκαν κάθε Σαββατοκύριακο. Χρυσή μπάρα όταν πιάσαμε όλοι (100%).</p>
+    <div class="br-chart" id="chart" data-source="team_weeks"></div>
+    <h3 class="br-h3">Σημεία</h3>
+    <p class="br-p">Ποσοστό σημείων που βγήκαν κάθε Σαββατοκύριακο. Η γραμμή δείχνει αν ανεβαίνουμε ή πέφτουμε, η διακεκομμένη είναι το 50%.</p>
+    <div class="br-chart" id="chart2" data-source="team_weeks"></div>
+  </section>
+
+  <section class="br-sec" id="tests">
+    <div class="br-h"><h2>Test bets</h2><p>Οι δύο δοκιμαστικές αγωνιστικές. Δεν μετράνε σε κανένα από τα παραπάνω στατιστικά.</p></div>
+    <div class="br-rounds" id="tests-box"></div>
+  </section>
+
+  <section class="br-sec" id="standings">
+    <details class="br-fold">
+      <summary><div class="br-h" style="margin:0"><h2>Βαθμολογία</h2><p>Για όταν θέλουμε και λίγο ανταγωνισμό</p></div><span class="tg">Εμφάνιση</span></summary>
+      <div class="br-scroll">
+        <table data-source="standings" data-row-key="player">
+          <thead><tr>
+            <th data-field="rank" class="l">#</th>
+            <th data-field="player" class="l">Παίκτης</th>
+            <th data-field="coupons">Κουπόνια</th>
+            <th data-field="won">Σωστά</th>
+            <th data-field="lost">Λάθος</th>
+            <th data-field="profit">Μονάδες</th>
+          </tr></thead>
+          <tbody id="st-body"></tbody>
+        </table>
+      </div>
+      <p class="br-foot">Μονάδες: 1 μονάδα σε κάθε κουπόνι. Κερδισμένο = απόδοση − 1, χαμένο = −1.</p>
+    </details>
+  </section>
+</div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (Αγγλία)"}, {"player": "Aggelos", "league": "Bundesliga (Γερμανία)"}, {"player": "Anthony", "league": "La Liga (Ισπανία)"}, {"player": "Shimis", "league": "Super League (Ελλάδα)"}, {"player": "Dorch", "league": "Premier League (Αγγλία)"}], "coupons": [{"id": "template", "weekend": "2000-01-01", "player": "", "league": "", "odds": 0, "picks": 0, "picks_won": 0, "selections": 0, "status": ""}, {"id": "T1-anthony", "weekend": "2026-08-28", "player": "Anthony", "league": "La Liga (Ισπανία)", "test": true, "odds": 4.97, "picks": 3, "picks_won": 2, "selections": 3, "status": "Έχασε"}, {"id": "T1-pourou", "weekend": "2026-08-28", "player": "Pourou", "league": "Premier League (Αγγλία)", "test": true, "odds": 5.27, "picks": 3, "picks_won": 2, "selections": 4, "status": "Έχασε"}, {"id": "T1-shimis", "weekend": "2026-08-28", "player": "Shimis", "league": "Super League (Ελλάδα)", "test": true, "odds": 5.66, "picks": 4, "picks_won": 4, "selections": 3, "status": "Κέρδισε"}, {"id": "T1-dorch", "weekend": "2026-08-28", "player": "Dorch", "league": "Premier League (Αγγλία)", "test": true, "odds": 3.41, "picks": 3, "picks_won": 2, "selections": 3, "status": "Έχασε"}, {"id": "T2-anthony", "weekend": "2026-09-04", "player": "Anthony", "league": "La Liga (Ισπανία)", "test": true, "odds": 5.47, "picks": 5, "picks_won": 3, "selections": 4, "status": "Έχασε"}, {"id": "T2-shimis", "weekend": "2026-09-04", "player": "Shimis", "league": "Super League (Ελλάδα)", "test": true, "odds": 5.06, "picks": 5, "picks_won": 4, "selections": 3, "status": "Έχασε"}, {"id": "T2-pourou", "weekend": "2026-09-04", "player": "Pourou", "league": "Premier League (Αγγλία)", "test": true, "odds": 4.75, "picks": 6, "picks_won": 4, "selections": 3, "status": "Έχασε"}, {"id": "T2-dorch", "weekend": "2026-09-04", "player": "Dorch", "league": "Premier League (Αγγλία)", "test": true, "odds": 5.81, "picks": 7, "picks_won": 5, "selections": 4, "status": "Έχασε"}, {"id": "T2-aggelos", "weekend": "2026-09-04", "player": "Aggelos", "league": "Bundesliga (Γερμανία)", "test": true, "odds": 4.91, "picks": 4, "picks_won": 3, "selections": 4, "status": "Έχασε"}, {"id": "R1-shimis", "weekend": "2026-09-11", "player": "Shimis", "league": "Super League (Ελλάδα)", "test": false, "odds": 5.52, "picks": 4, "picks_won": 2, "selections": 3, "status": "Έχασε"}, {"id": "R1-dorch", "weekend": "2026-09-11", "player": "Dorch", "league": "Premier League (Αγγλία)", "test": false, "odds": 6.66, "picks": 6, "picks_won": 3, "selections": 4, "status": "Έχασε"}, {"id": "R1-aggelos", "weekend": "2026-09-11", "player": "Aggelos", "league": "Bundesliga (Γερμανία)", "test": false, "odds": 4.92, "picks": 4, "picks_won": 4, "selections": 4, "status": "Κέρδισε"}, {"id": "R1-pourou", "weekend": "2026-09-11", "player": "Pourou", "league": "Premier League (Αγγλία)", "test": false, "odds": 5.37, "picks": 3, "picks_won": 3, "selections": 3, "status": "Κέρδισε"}, {"id": "R1-anthony", "weekend": "2026-09-11", "player": "Anthony", "league": "La Liga (Ισπανία)", "test": false, "odds": 5.16, "picks": 7, "picks_won": 4, "selections": 4, "status": "Έχασε"}, {"id": "R2-anthony", "weekend": "2026-09-18", "player": "Anthony", "league": "La Liga (Ισπανία)", "test": false, "odds": 5.07, "picks": 4, "picks_won": 4, "selections": 3, "status": "Κέρδισε"}, {"id": "R2-pourou", "weekend": "2026-09-18", "player": "Pourou", "league": "Premier League (Αγγλία)", "test": false, "odds": 4.6, "picks": 4, "picks_won": 3, "selections": 4, "status": "Έχασε"}, {"id": "R2-shimis", "weekend": "2026-09-18", "player": "Shimis", "league": "Super League (Ελλάδα)", "test": false, "odds": 5.49, "picks": 5, "picks_won": 5, "selections": 3, "status": "Κέρδισε"}, {"id": "R2-dorch", "weekend": "2026-09-18", "player": "Dorch", "league": "Premier League (Αγγλία)", "test": false, "odds": 6.2, "picks": 3, "picks_won": 1, "selections": 1, "status": "Έχασε"}, {"id": "R2-aggelos", "weekend": "2026-09-18", "player": "Aggelos", "league": "Bundesliga (Γερμανία)", "test": false, "odds": 4.3, "picks": 4, "picks_won": 1, "selections": 4, "status": "Έχασε"}, {"id": "R3-anthony", "weekend": "2026-10-09", "player": "Anthony", "league": "La Liga (Ισπανία)", "test": false, "odds": 5.64, "picks": 5, "picks_won": 5, "selections": 4, "status": "Κέρδισε"}, {"id": "R3-dorch", "weekend": "2026-10-09", "player": "Dorch", "league": "Premier League (Αγγλία)", "test": false, "odds": 5.0, "picks": 6, "picks_won": 4, "selections": 1, "status": "Έχασε"}, {"id": "R3-shimis", "weekend": "2026-10-09", "player": "Shimis", "league": "Super League (Ελλάδα)", "test": false, "odds": 4.52, "picks": 2, "picks_won": 1, "selections": 2, "status": "Έχασε"}, {"id": "R3-pourou", "weekend": "2026-10-09", "player": "Pourou", "league": "Premier League (Αγγλία)", "test": false, "odds": 5.11, "picks": 6, "picks_won": 5, "selections": 3, "status": "Έχασε"}, {"id": "R3-aggelos", "weekend": "2026-10-09", "player": "Aggelos", "league": "Bundesliga (Γερμανία)", "test": false, "odds": 4.72, "picks": 4, "picks_won": 3, "selections": 3, "status": "Έχασε"}], "legs": [{"id": "template", "coupon_id": "template", "weekend": "2000-01-01", "player": "", "sel": 0, "sel_odds": 0, "sel_type": "", "match": "", "market": "", "pick": "", "result": ""}, {"id": "T1-anthony-1a", "coupon_id": "T1-anthony", "weekend": "2026-08-28", "player": "Anthony", "test": true, "sel": 1, "sel_odds": 1.75, "sel_type": "Μονή", "match": "Λεβάντε–Μπέτις 5-2", "market": "Διπλή ευκαιρία & Over 1.5", "pick": "Χ2 & Over 1.5", "result": "Λάθος"}, {"id": "T1-anthony-2a", "coupon_id": "T1-anthony", "weekend": "2026-08-28", "player": "Anthony", "test": true, "sel": 2, "sel_odds": 1.72, "sel_type": "Μονή", "match": "Σεβίλλη–Ατλέτικο 1-3", "market": "Goal/Goal", "pick": "Goal/Goal", "result": "Σωστό"}, {"id": "T1-anthony-3a", "coupon_id": "T1-anthony", "weekend": "2026-08-28", "player": "Anthony", "test": true, "sel": 3, "sel_odds": 1.65, "sel_type": "Μονή", "match": "Ράσινγκ–Έλτσε 3-2", "market": "Διπλή ευκαιρία & Over 1.5", "pick": "1Χ & Over 1.5", "result": "Σωστό"}, {"id": "T1-pourou-1a", "coupon_id": "T1-pourou", "weekend": "2026-08-28", "player": "Pourou", "test": true, "sel": 1, "sel_odds": 1.72, "sel_type": "Bet Builder", "match": "Τσέλσι–Μπράιτον 4-3", "market": "Over γκολ (έως 1.5)", "pick": "Over 1 γκολ", "result": "Σωστό"}, {"id": "T1-pourou-1b", "coupon_id": "T1-pourou", "weekend": "2026-08-28", "player": "Pourou", "test": true, "sel": 1, "sel_odds": 1.72, "sel_type": "Bet Builder", "match": "Τσέλσι–Μπράιτον 4-3", "market": "Κόρνερ", "pick": "Over 3 κόρνερ 1ο ημ.", "result": "Άγνωστο"}, {"id": "T1-pourou-2a", "coupon_id": "T1-pourou", "weekend": "2026-08-28", "player": "Pourou", "test": true, "sel": 2, "sel_odds": 1.57, "sel_type": "Μονή", "match": "Λίβερπουλ–Νότιγχαμ 2-2", "market": "Κόρνερ", "pick": "Λίβερπουλ Over 2 κόρνερ 1ο ημ.", "result": "Άγνωστο"}, {"id": "T1-pourou-3a", "coupon_id": "T1-pourou", "weekend": "2026-08-28", "player": "Pourou", "test": true, "sel": 3, "sel_odds": 1.66, "sel_type": "Μονή", "match": "Τότεναμ–Νιούκαστλ 0-2", "market": "Νίκη σε ημίχρονο", "pick": "Τότεναμ νίκη σε ημίχρονο", "result": "Λάθος"}, {"id": "T1-pourou-4a", "coupon_id": "T1-pourou", "weekend": "2026-08-28", "player": "Pourou", "test": true, "sel": 4, "sel_odds": 1.16, "sel_type": "Μονή", "match": "Μάν. Γιουν.–Ίπσουιτς 5-2", "market": "Over γκολ (έως 1.5)", "pick": "Over 1.5", "result": "Σωστό"}, {"id": "T1-shimis-1a", "coupon_id": "T1-shimis", "weekend": "2026-08-28", "player": "Shimis", "test": true, "sel": 1, "sel_odds": 1.7, "sel_type": "Bet Builder", "match": "Βόλος–Ηρακλής 1-1", "market": "Διπλή ευκαιρία", "pick": "1Χ", "result": "Σωστό"}, {"id": "T1-shimis-1b", "coupon_id": "T1-shimis", "weekend": "2026-08-28", "player": "Shimis", "test": true, "sel": 1, "sel_odds": 1.7, "sel_type": "Bet Builder", "match": "Βόλος–Ηρακλής 1-1", "market": "Over γκολ (έως 1.5)", "pick": "Over 1.5", "result": "Σωστό"}, {"id": "T1-shimis-2a", "coupon_id": "T1-shimis", "weekend": "2026-08-28", "player": "Shimis", "test": true, "sel": 2, "sel_odds": 1.85, "sel_type": "Μονή", "match": "Άρης–ΟΦΗ 2-1", "market": "Goal/Goal", "pick": "Goal/Goal", "result": "Σωστό"}, {"id": "T1-shimis-3a", "coupon_id": "T1-shimis", "weekend": "2026-08-28", "player": "Shimis", "test": true, "sel": 3, "sel_odds": 1.8, "sel_type": "Μονή", "match": "Ατρόμητος–ΠΑΟΚ 1-2", "market": "Goal/Goal", "pick": "Goal/Goal", "result": "Σωστό"}, {"id": "T1-dorch-1a", "coupon_id": "T1-dorch", "weekend": "2026-08-28", "player": "Dorch", "test": true, "sel": 1, "sel_odds": 1.62, "sel_type": "Μονή", "match": "Λίβερπουλ–Νότιγχαμ 2-2", "market": "Over γκολ (2+)", "pick": "Over 2.5", "result": "Σωστό"}, {"id": "T1-dorch-2a", "coupon_id": "T1-dorch", "weekend": "2026-08-28", "player": "Dorch", "test": true, "sel": 2, "sel_odds": 1.3, "sel_type": "Μονή", "match": "Μπόρνμουθ–Έβερτον 1-1", "market": "Over γκολ (έως 1.5)", "pick": "Over 1.5", "result": "Σωστό"}, {"id": "T1-dorch-3a", "coupon_id": "T1-dorch", "weekend": "2026-08-28", "player": "Dorch", "test": true, "sel": 3, "sel_odds": 1.62, "sel_type": "Μονή", "match": "Τότεναμ–Νιούκαστλ 0-2", "market": "Over γκολ (2+)", "pick": "Over 2.5", "result": "Λάθος"}, {"id": "T2-anthony-1a", "coupon_id": "T2-anthony", "weekend": "2026-09-04", "player": "Anthony", "test": true, "sel": 1, "sel_odds": 1.52, "sel_type": "Bet Builder", "match": "Μπέτις–Ρεάλ 1-0", "market": "Over γκολ (έως 1.5)", "pick": "Over 1.5", "result": "Λάθος"}, {"id": "T2-anthony-1b", "coupon_id": "T2-anthony", "weekend": "2026-09-04", "player": "Anthony", "test": true, "sel": 1, "sel_odds": 1.52, "sel_type": "Bet Builder", "match": "Μπέτις–Ρεάλ 1-0", "market": "Σουτ στο τέρμα", "pick": "Bellingham 1+ σουτ στο τέρμα", "result": "Σωστό"}, {"id": "T2-anthony-2a", "coupon_id": "T2-anthony", "weekend": "2026-09-04", "player": "Anthony", "test": true, "sel": 2, "sel_odds": 1.75, "sel_type": "Μονή", "match": "Ράγιο–Ράσινγκ 3-2", "market": "Διπλή ευκαιρία & Over 1.5", "pick": "1Χ & Over 1.5", "result": "Σωστό"}, {"id": "T2-anthony-3a", "coupon_id": "T2-anthony", "weekend": "2026-09-04", "player": "Anthony", "test": true, "sel": 3, "sel_odds": 1.4, "sel_type": "Μονή", "match": "Βιγιαρεάλ–Λα Κορούνια 2-3", "market": "Διπλή ευκαιρία & Over 1.5", "pick": "1Χ & Over 1.5", "result": "Λάθος"}, {"id": "T2-anthony-4a", "coupon_id": "T2-anthony", "weekend": "2026-09-04", "player": "Anthony", "test": true, "sel": 4, "sel_odds": 1.47, "sel_type": "Μονή", "match": "Εσπανιόλ–Σεβίλλη 1-1", "market": "Over γκολ (έως 1.5)", "pick": "Over 1.5", "result": "Σωστό"}, {"id": "T2-shimis-1a", "coupon_id": "T2-shimis", "weekend": "2026-09-04", "player": "Shimis", "test": true, "sel": 1, "sel_odds": 1.66, "sel_type": "Bet Builder", "match": "ΑΕΚ–Άρης 5-0", "market": "Νίκη", "pick": "ΑΕΚ νίκη", "result": "Σωστό"}, {"id": "T2-shimis-1b", "coupon_id": "T2-shimis", "weekend": "2026-09-04", "player": "Shimis", "test": true, "sel": 1, "sel_odds": 1.66, "sel_type": "Bet Builder", "match": "ΑΕΚ–Άρης 5-0", "market": "Over γκολ (έως 1.5)", "pick": "Over 1.5", "result": "Σωστό"}, {"id": "T2-shimis-2a", "coupon_id": "T2-shimis", "weekend": "2026-09-04", "player": "Shimis", "test": true, "sel": 2, "sel_odds": 1.9, "sel_type": "Μονή", "match": "Λεβαδειακός–Παναιτωλικός 0-2", "market": "Goal/Goal", "pick": "Goal/Goal", "result": "Λάθος"}, {"id": "T2-shimis-3a", "coupon_id": "T2-shimis", "weekend": "2026-09-04", "player": "Shimis", "test": true, "sel": 3, "sel_odds": 1.6, "sel_type": "Bet Builder", "match": "Ατρόμητος–Καλαμάτα 1-1", "market": "Διπλή ευκαιρία", "pick": "1Χ", "result": "Σωστό"}, {"id": "T2-shimis-3b", "coupon_id": "T2-shimis", "weekend": "2026-09-04", "player": "Shimis", "test": true, "sel": 3, "sel_odds": 1.6, "sel_type": "Bet Builder", "match": "Ατρόμητος–Καλαμάτα 1-1", "market": "Over γκολ (έως 1.5)", "pick": "Over 1.5", "result": "Σωστό"}, {"id": "T2-pourou-1a", "coupon_id": "T2-pourou", "weekend": "2026-09-04", "player": "Pourou", "test": true, "sel": 1, "sel_odds": 1.47, "sel_type": "Bet Builder", "match": "Ίπσουιτς–Λίβερπουλ 0-2", "market": "Over γκολ (2+)", "pick": "Over 2 γκολ (3+)", "result": "Λάθος"}, {"id": "T2-pourou-1b", "coupon_id": "T2-pourou", "weekend": "2026-09-04", "player": "Pourou", "test": true, "sel": 1, "sel_odds": 1.47, "sel_type": "Bet Builder", "match": "Ίπσουιτς–Λίβερπουλ 0-2", "market": "Γκολ 1ου ημιχρόνου", "pick": "Over 0 γκολ 1ο ημ.", "result": "Σωστό"}, {"id": "T2-pourou-2a", "coupon_id": "T2-pourou", "weekend": "2026-09-04", "player": "Pourou", "test": true, "sel": 2, "sel_odds": 1.53, "sel_type": "Bet Builder", "match": "Μπράιτον–Λιντς 1-1", "market": "Κόρνερ", "pick": "Μπράιτον 1+ κόρνερ 1ο ημ.", "result": "Άγνωστο"}, {"id": "T2-pourou-2b", "coupon_id": "T2-pourou", "weekend": "2026-09-04", "player": "Pourou", "test": true, "sel": 2, "sel_odds": 1.53, "sel_type": "Bet Builder", "match": "Μπράιτον–Λιντς 1-1", "market": "Γκολ ομάδας", "pick": "Μπράιτον σκοράρει", "result": "Σωστό"}, {"id": "T2-pourou-2c", "coupon_id": "T2-pourou", "weekend": "2026-09-04", "player": "Pourou", "test": true, "sel": 2, "sel_odds": 1.53, "sel_type": "Bet Builder", "match": "Μπράιτον–Λιντς 1-1", "market": "Σουτ στο τέρμα", "pick": "Μπράιτον 1+ σουτ στο τέρμα 1ο ημ.", "result": "Σωστό"}, {"id": "T2-pourou-3a", "coupon_id": "T2-pourou", "weekend": "2026-09-04", "player": "Pourou", "test": true, "sel": 3, "sel_odds": 2.1, "sel_type": "Bet Builder", "match": "Φούλαμ–Κρίσταλ Πάλας 2-3", "market": "Κάρτες", "pick": "Over 3 κάρτες", "result": "Λάθος"}, {"id": "T2-pourou-3b", "coupon_id": "T2-pourou", "weekend": "2026-09-04", "player": "Pourou", "test": true, "sel": 3, "sel_odds": 2.1, "sel_type": "Bet Builder", "match": "Φούλαμ–Κρίσταλ Πάλας 2-3", "market": "Γκολ ομάδας", "pick": "Φούλαμ σκοράρει", "result": "Σωστό"}, {"id": "T2-dorch-1a", "coupon_id": "T2-dorch", "weekend": "2026-09-04", "player": "Dorch", "test": true, "sel": 1, "sel_odds": 1.45, "sel_type": "Bet Builder", "match": "Μπρέντφορντ–Σάντερλαντ 1-1", "market": "Διπλή ευκαιρία", "pick": "1Χ", "result": "Σωστό"}, {"id": "T2-dorch-1b", "coupon_id": "T2-dorch", "weekend": "2026-09-04", "player": "Dorch", "test": true, "sel": 1, "sel_odds": 1.45, "sel_type": "Bet Builder", "match": "Μπρέντφορντ–Σάντερλαντ 1-1", "market": "Over γκολ (έως 1.5)", "pick": "Over 1.5", "result": "Σωστό"}, {"id": "T2-dorch-2a", "coupon_id": "T2-dorch", "weekend": "2026-09-04", "player": "Dorch", "test": true, "sel": 2, "sel_odds": 1.5, "sel_type": "Bet Builder", "match": "Σίτι–Κόβεντρι 1-0", "market": "Νίκη", "pick": "Σίτι νίκη", "result": "Σωστό"}, {"id": "T2-dorch-2b", "coupon_id": "T2-dorch", "weekend": "2026-09-04", "player": "Dorch", "test": true, "sel": 2, "sel_odds": 1.5, "sel_type": "Bet Builder", "match": "Σίτι–Κόβεντρι 1-0", "market": "Over γκολ (2+)", "pick": "Over 2.5", "result": "Λάθος"}, {"id": "T2-dorch-3a", "coupon_id": "T2-dorch", "weekend": "2026-09-04", "player": "Dorch", "test": true, "sel": 3, "sel_odds": 1.6, "sel_type": "Bet Builder", "match": "Νιούκαστλ–Μπόρνμουθ 2-2", "market": "Διπλή ευκαιρία", "pick": "1Χ", "result": "Σωστό"}, {"id": "T2-dorch-3b", "coupon_id": "T2-dorch", "weekend": "2026-09-04", "player": "Dorch", "test": true, "sel": 3, "sel_odds": 1.6, "sel_type": "Bet Builder", "match": "Νιούκαστλ–Μπόρνμουθ 2-2", "market": "Over γκολ (έως 1.5)", "pick": "Over 1.5", "result": "Σωστό"}, {"id": "T2-dorch-4a", "coupon_id": "T2-dorch", "weekend": "2026-09-04", "player": "Dorch", "test": true, "sel": 4, "sel_odds": 1.67, "sel_type": "Μονή", "match": "Νότιγχαμ–Τότεναμ 0-0", "market": "Goal/Goal", "pick": "Goal/Goal", "result": "Λάθος"}, {"id": "T2-aggelos-1a", "coupon_id": "T2-aggelos", "weekend": "2026-09-04", "player": "Aggelos", "test": true, "sel": 1, "sel_odds": 1.76, "sel_type": "Μονή", "match": "Βέρντερ–Λειψία 3-1", "market": "Νίκη", "pick": "Λειψία νίκη", "result": "Λάθος"}, {"id": "T2-aggelos-2a", "coupon_id": "T2-aggelos", "weekend": "2026-09-04", "player": "Aggelos", "test": true, "sel": 2, "sel_odds": 1.31, "sel_type": "Μονή", "match": "Πάντερμπορν–Φράιμπουργκ 0-1", "market": "Διπλή ευκαιρία", "pick": "Χ2", "result": "Σωστό"}, {"id": "T2-aggelos-3a", "coupon_id": "T2-aggelos", "weekend": "2026-09-04", "player": "Aggelos", "test": true, "sel": 3, "sel_odds": 1.48, "sel_type": "Μονή", "match": "Άιντραχτ–Άουγκσμπουργκ 1-4", "market": "Over γκολ (2+)", "pick": "Over 2.5", "result": "Σωστό"}, {"id": "T2-aggelos-4a", "coupon_id": "T2-aggelos", "weekend": "2026-09-04", "player": "Aggelos", "test": true, "sel": 4, "sel_odds": 1.44, "sel_type": "Μονή", "match": "Αμβούργο–Μάιντς 0-5", "market": "Διπλή ευκαιρία", "pick": "Χ2", "result": "Σωστό"}, {"id": "R1-shimis-1a", "coupon_id": "R1-shimis", "weekend": "2026-09-11", "player": "Shimis", "test": false, "sel": 1, "sel_odds": 2.15, "sel_type": "Μονή", "match": "Παναθηναϊκός–Παναιτωλικός 3-0", "market": "Goal/Goal", "pick": "Goal/Goal", "result": "Λάθος"}, {"id": "R1-shimis-2a", "coupon_id": "R1-shimis", "weekend": "2026-09-11", "player": "Shimis", "test": false, "sel": 2, "sel_odds": 1.51, "sel_type": "Μονή", "match": "ΠΑΟΚ–Άρης 2-0", "market": "Νίκη", "pick": "ΠΑΟΚ νίκη", "result": "Σωστό"}, {"id": "R1-shimis-3a", "coupon_id": "R1-shimis", "weekend": "2026-09-11", "player": "Shimis", "test": false, "sel": 3, "sel_odds": 1.7, "sel_type": "Bet Builder", "match": "Αστέρας–ΑΕΚ 1-1", "market": "Νίκη", "pick": "ΑΕΚ νίκη", "result": "Λάθος"}, {"id": "R1-shimis-3b", "coupon_id": "R1-shimis", "weekend": "2026-09-11", "player": "Shimis", "test": false, "sel": 3, "sel_odds": 1.7, "sel_type": "Bet Builder", "match": "Αστέρας–ΑΕΚ 1-1", "market": "Over γκολ (έως 1.5)", "pick": "Over 1.5", "result": "Σωστό"}, {"id": "R1-dorch-1a", "coupon_id": "R1-dorch", "weekend": "2026-09-11", "player": "Dorch", "test": false, "sel": 1, "sel_odds": 1.57, "sel_type": "Bet Builder", "match": "Λίβερπουλ–Φούλαμ 0-0", "market": "Νίκη", "pick": "Λίβερπουλ νίκη", "result": "Λάθος"}, {"id": "R1-dorch-1b", "coupon_id": "R1-dorch", "weekend": "2026-09-11", "player": "Dorch", "test": false, "sel": 1, "sel_odds": 1.57, "sel_type": "Bet Builder", "match": "Λίβερπουλ–Φούλαμ 0-0", "market": "Γκολ ομάδας", "pick": "Λίβερπουλ Over 1.5", "result": "Λάθος"}, {"id": "R1-dorch-2a", "coupon_id": "R1-dorch", "weekend": "2026-09-11", "player": "Dorch", "test": false, "sel": 2, "sel_odds": 1.57, "sel_type": "Bet Builder", "match": "Σάντερλαντ–Άρσεναλ 0-2", "market": "Νίκη", "pick": "Άρσεναλ νίκη", "result": "Σωστό"}, {"id": "R1-dorch-2b", "coupon_id": "R1-dorch", "weekend": "2026-09-11", "player": "Dorch", "test": false, "sel": 2, "sel_odds": 1.57, "sel_type": "Bet Builder", "match": "Σάντερλαντ–Άρσεναλ 0-2", "market": "Under γκολ", "pick": "Σάντερλαντ Under 1.5", "result": "Σωστό"}, {"id": "R1-dorch-3a", "coupon_id": "R1-dorch", "weekend": "2026-09-11", "player": "Dorch", "test": false, "sel": 3, "sel_odds": 1.67, "sel_type": "Μονή", "match": "Βίλα–Νότιγχαμ 1-2", "market": "Κόρνερ", "pick": "Νότιγχαμ Over 3.5 κόρνερ", "result": "Λάθος"}, {"id": "R1-dorch-4a", "coupon_id": "R1-dorch", "weekend": "2026-09-11", "player": "Dorch", "test": false, "sel": 4, "sel_odds": 1.62, "sel_type": "Μονή", "match": "Μπόρνμουθ–Μπρέντφορντ 2-2", "market": "Over γκολ (2+)", "pick": "Over 2.5", "result": "Σωστό"}, {"id": "R1-aggelos-1a", "coupon_id": "R1-aggelos", "weekend": "2026-09-11", "player": "Aggelos", "test": false, "sel": 1, "sel_odds": 1.7, "sel_type": "Μονή", "match": "Φράιμπουργκ–Γκλάντμπαχ 5-0", "market": "Νίκη", "pick": "Φράιμπουργκ νίκη", "result": "Σωστό"}, {"id": "R1-aggelos-2a", "coupon_id": "R1-aggelos", "weekend": "2026-09-11", "player": "Aggelos", "test": false, "sel": 2, "sel_odds": 1.5, "sel_type": "Μονή", "match": "Κολωνία–Βέρντερ 1-1", "market": "Goal/Goal", "pick": "Goal/Goal", "result": "Σωστό"}, {"id": "R1-aggelos-3a", "coupon_id": "R1-aggelos", "weekend": "2026-09-11", "player": "Aggelos", "test": false, "sel": 3, "sel_odds": 1.43, "sel_type": "Μονή", "match": "Άουγκσμπουργκ–Λεβερκούζεν 2-2", "market": "Over γκολ (2+)", "pick": "Over 2.5", "result": "Σωστό"}, {"id": "R1-aggelos-4a", "coupon_id": "R1-aggelos", "weekend": "2026-09-11", "player": "Aggelos", "test": false, "sel": 4, "sel_odds": 1.35, "sel_type": "Μονή", "match": "Λειψία–Αμβούργο 5-0", "market": "Νίκη", "pick": "Λειψία νίκη", "result": "Σωστό"}, {"id": "R1-pourou-1a", "coupon_id": "R1-pourou", "weekend": "2026-09-11", "player": "Pourou", "test": false, "sel": 1, "sel_odds": 1.72, "sel_type": "Μονή", "match": "Κόβεντρι–Μπράιτον 0-5", "market": "Over γκολ (2+)", "pick": "Over 2.5", "result": "Σωστό"}, {"id": "R1-pourou-2a", "coupon_id": "R1-pourou", "weekend": "2026-09-11", "player": "Pourou", "test": false, "sel": 2, "sel_odds": 1.72, "sel_type": "Μονή", "match": "Τότεναμ–Έβερτον 0-0", "market": "Κόρνερ", "pick": "Over 4 κόρνερ 1ο ημ.", "result": "Σωστό"}, {"id": "R1-pourou-3a", "coupon_id": "R1-pourou", "weekend": "2026-09-11", "player": "Pourou", "test": false, "sel": 3, "sel_odds": 1.8, "sel_type": "Μονή", "match": "Κρίσταλ Πάλας–Ίπσουιτς 2-3", "market": "Over γκολ (2+)", "pick": "Over 2.5", "result": "Σωστό"}, {"id": "R1-anthony-1a", "coupon_id": "R1-anthony", "weekend": "2026-09-11", "player": "Anthony", "test": false, "sel": 1, "sel_odds": 1.65, "sel_type": "Bet Builder", "match": "Οσασούνα–Εσπανιόλ 0-2", "market": "Διπλή ευκαιρία", "pick": "1Χ", "result": "Λάθος"}, {"id": "R1-anthony-1b", "coupon_id": "R1-anthony", "weekend": "2026-09-11", "player": "Anthony", "test": false, "sel": 1, "sel_odds": 1.65, "sel_type": "Bet Builder", "match": "Οσασούνα–Εσπανιόλ 0-2", "market": "Σουτ στο τέρμα", "pick": "Budimir 1+ σουτ στο τέρμα", "result": "Λάθος"}, {"id": "R1-anthony-1c", "coupon_id": "R1-anthony", "weekend": "2026-09-11", "player": "Anthony", "test": false, "sel": 1, "sel_odds": 1.65, "sel_type": "Bet Builder", "match": "Οσασούνα–Εσπανιόλ 0-2", "market": "Κάρτες", "pick": "Κάρτα και οι δύο ομάδες", "result": "Σωστό"}, {"id": "R1-anthony-2a", "coupon_id": "R1-anthony", "weekend": "2026-09-11", "player": "Anthony", "test": false, "sel": 2, "sel_odds": 1.53, "sel_type": "Μονή", "match": "Σοσιεδάδ–Ατλέτικο 0-3", "market": "Goal/Goal", "pick": "Goal/Goal", "result": "Λάθος"}, {"id": "R1-anthony-3a", "coupon_id": "R1-anthony", "weekend": "2026-09-11", "player": "Anthony", "test": false, "sel": 3, "sel_odds": 1.42, "sel_type": "Μονή", "match": "Χετάφε–Λα Κορούνια 1-1", "market": "Σουτ στο τέρμα", "pick": "Ομπαμεγιάνγκ 1+ σουτ στο τέρμα", "result": "Σωστό"}, {"id": "R1-anthony-4a", "coupon_id": "R1-anthony", "weekend": "2026-09-11", "player": "Anthony", "test": false, "sel": 4, "sel_odds": 1.44, "sel_type": "Bet Builder", "match": "Αθλέτικ–Έλτσε 1-1", "market": "Διπλή ευκαιρία", "pick": "1Χ", "result": "Σωστό"}, {"id": "R1-anthony-4b", "coupon_id": "R1-anthony", "weekend": "2026-09-11", "player": "Anthony", "test": false, "sel": 4, "sel_odds": 1.44, "sel_type": "Bet Builder", "match": "Αθλέτικ–Έλτσε 1-1", "market": "Κόρνερ", "pick": "Αθλέτικ Over 3.5 κόρνερ", "result": "Σωστό"}, {"id": "R2-anthony-1a", "coupon_id": "R2-anthony", "weekend": "2026-09-18", "player": "Anthony", "test": false, "sel": 1, "sel_odds": 1.9, "sel_type": "Μονή", "match": "Οσασούνα–Ράγιο 1-1", "market": "Διπλή ευκαιρία & Over 1.5", "pick": "1Χ & Over 1.5", "result": "Σωστό"}, {"id": "R2-anthony-2a", "coupon_id": "R2-anthony", "weekend": "2026-09-18", "player": "Anthony", "test": false, "sel": 2, "sel_odds": 1.67, "sel_type": "Μονή", "match": "Σεβίλλη–Μπαρτσελόνα 1-3", "market": "Goal/Goal", "pick": "Goal/Goal", "result": "Σωστό"}, {"id": "R2-anthony-3a", "coupon_id": "R2-anthony", "weekend": "2026-09-18", "player": "Anthony", "test": false, "sel": 3, "sel_odds": 1.6, "sel_type": "Bet Builder", "match": "Ατλέτικο–Ρεάλ 2-1", "market": "Κάρτες", "pick": "Κάρτα και οι δύο ομάδες", "result": "Σωστό"}, {"id": "R2-anthony-3b", "coupon_id": "R2-anthony", "weekend": "2026-09-18", "player": "Anthony", "test": false, "sel": 3, "sel_odds": 1.6, "sel_type": "Bet Builder", "match": "Ατλέτικο–Ρεάλ 2-1", "market": "Over γκολ (2+)", "pick": "Over 2.5", "result": "Σωστό"}, {"id": "R2-pourou-1a", "coupon_id": "R2-pourou", "weekend": "2026-09-18", "player": "Pourou", "test": false, "sel": 1, "sel_odds": 1.4, "sel_type": "Μονή", "match": "Μπρέντφορντ–Τσέλσι 3-0", "market": "Κόρνερ", "pick": "Over 3.5 κόρνερ 1ο ημ.", "result": "Σωστό"}, {"id": "R2-pourou-2a", "coupon_id": "R2-pourou", "weekend": "2026-09-18", "player": "Pourou", "test": false, "sel": 2, "sel_odds": 1.31, "sel_type": "Μονή", "match": "Τότεναμ–Βίλα 2-3", "market": "Κόρνερ", "pick": "Over 3.5 κόρνερ 1ο ημ.", "result": "Σωστό"}, {"id": "R2-pourou-3a", "coupon_id": "R2-pourou", "weekend": "2026-09-18", "player": "Pourou", "test": false, "sel": 3, "sel_odds": 1.57, "sel_type": "Μονή", "match": "Μπόρνμουθ–Λίβερπουλ 0-1", "market": "Νίκη σε ημίχρονο", "pick": "Λίβερπουλ νίκη σε ημίχρονο", "result": "Σωστό"}, {"id": "R2-pourou-4a", "coupon_id": "R2-pourou", "weekend": "2026-09-18", "player": "Pourou", "test": false, "sel": 4, "sel_odds": 1.57, "sel_type": "Μονή", "match": "Φούλαμ–Μάν. Γιουν. 1-1", "market": "Over γκολ (2+)", "pick": "Over 2.5", "result": "Λάθος"}, {"id": "R2-shimis-1a", "coupon_id": "R2-shimis", "weekend": "2026-09-18", "player": "Shimis", "test": false, "sel": 1, "sel_odds": 1.58, "sel_type": "Bet Builder", "match": "Βόλος–ΑΕΚ 1-2", "market": "Νίκη", "pick": "ΑΕΚ νίκη", "result": "Σωστό"}, {"id": "R2-shimis-1b", "coupon_id": "R2-shimis", "weekend": "2026-09-18", "player": "Shimis", "test": false, "sel": 1, "sel_odds": 1.58, "sel_type": "Bet Builder", "match": "Βόλος–ΑΕΚ 1-2", "market": "Over γκολ (έως 1.5)", "pick": "Over 1 γκολ", "result": "Σωστό"}, {"id": "R2-shimis-2a", "coupon_id": "R2-shimis", "weekend": "2026-09-18", "player": "Shimis", "test": false, "sel": 2, "sel_odds": 1.83, "sel_type": "Bet Builder", "match": "ΟΦΗ–Αστέρας 2-2", "market": "Διπλή ευκαιρία", "pick": "1Χ", "result": "Σωστό"}, {"id": "R2-shimis-2b", "coupon_id": "R2-shimis", "weekend": "2026-09-18", "player": "Shimis", "test": false, "sel": 2, "sel_odds": 1.83, "sel_type": "Bet Builder", "match": "ΟΦΗ–Αστέρας 2-2", "market": "Over γκολ (έως 1.5)", "pick": "Over 1 γκολ", "result": "Σωστό"}, {"id": "R2-shimis-3a", "coupon_id": "R2-shimis", "weekend": "2026-09-18", "player": "Shimis", "test": false, "sel": 3, "sel_odds": 1.9, "sel_type": "Μονή", "match": "Παναιτωλικός–ΠΑΟΚ 1-3", "market": "Goal/Goal", "pick": "Goal/Goal", "result": "Σωστό"}, {"id": "R2-dorch-1a", "coupon_id": "R2-dorch", "weekend": "2026-09-18", "player": "Dorch", "test": false, "sel": 1, "sel_odds": 6.2, "sel_type": "Bet Builder", "match": "Μπρέντφορντ–Τσέλσι 3-0", "market": "Κάρτες", "pick": "Janelt κάρτα", "result": "Λάθος"}, {"id": "R2-dorch-1b", "coupon_id": "R2-dorch", "weekend": "2026-09-18", "player": "Dorch", "test": false, "sel": 1, "sel_odds": 6.2, "sel_type": "Bet Builder", "match": "Μπρέντφορντ–Τσέλσι 3-0", "market": "Over γκολ (2+)", "pick": "Over 2.5", "result": "Σωστό"}, {"id": "R2-dorch-1c", "coupon_id": "R2-dorch", "weekend": "2026-09-18", "player": "Dorch", "test": false, "sel": 1, "sel_odds": 6.2, "sel_type": "Bet Builder", "match": "Μπρέντφορντ–Τσέλσι 3-0", "market": "Goal/Goal", "pick": "Goal/Goal", "result": "Λάθος"}, {"id": "R2-aggelos-1a", "coupon_id": "R2-aggelos", "weekend": "2026-09-18", "player": "Aggelos", "test": false, "sel": 1, "sel_odds": 1.41, "sel_type": "Μονή", "match": "Γκλάντμπαχ–Μάιντς 3-4", "market": "Διπλή ευκαιρία", "pick": "Χ2", "result": "Σωστό"}, {"id": "R2-aggelos-2a", "coupon_id": "R2-aggelos", "weekend": "2026-09-18", "player": "Aggelos", "test": false, "sel": 2, "sel_odds": 1.47, "sel_type": "Μονή", "match": "Αμβούργο–Κολωνία 2-1", "market": "Διπλή ευκαιρία", "pick": "Χ2", "result": "Λάθος"}, {"id": "R2-aggelos-3a", "coupon_id": "R2-aggelos", "weekend": "2026-09-18", "player": "Aggelos", "test": false, "sel": 3, "sel_odds": 1.47, "sel_type": "Μονή", "match": "Σάλκε–Έλβερσμπεργκ 0-0", "market": "Goal/Goal", "pick": "Goal/Goal", "result": "Λάθος"}, {"id": "R2-aggelos-4a", "coupon_id": "R2-aggelos", "weekend": "2026-09-18", "player": "Aggelos", "test": false, "sel": 4, "sel_odds": 1.41, "sel_type": "Μονή", "match": "Στουτγκάρδη–Ντόρτμουντ 0-1", "market": "Over γκολ (2+)", "pick": "Over 2.5", "result": "Λάθος"}, {"id": "R3-anthony-1a", "coupon_id": "R3-anthony", "weekend": "2026-10-09", "player": "Anthony", "test": false, "sel": 1, "sel_odds": 1.3, "sel_type": "Μονή", "match": "Μπέτις–Οσασούνα 5-2", "market": "Νίκη σε ημίχρονο", "pick": "Μπέτις νίκη σε ημίχρονο", "result": "Σωστό"}, {"id": "R3-anthony-2a", "coupon_id": "R3-anthony", "weekend": "2026-10-09", "player": "Anthony", "test": false, "sel": 2, "sel_odds": 1.53, "sel_type": "Μονή", "match": "Ράσινγκ–Βαλένθια 2-2", "market": "Goal/Goal", "pick": "Goal/Goal", "result": "Σωστό"}, {"id": "R3-anthony-3a", "coupon_id": "R3-anthony", "weekend": "2026-10-09", "player": "Anthony", "test": false, "sel": 3, "sel_odds": 1.37, "sel_type": "Μονή", "match": "Ρεάλ–Βιγιαρεάλ 1-0", "market": "Νίκη", "pick": "Ρεάλ νίκη", "result": "Σωστό"}, {"id": "R3-anthony-4a", "coupon_id": "R3-anthony", "weekend": "2026-10-09", "player": "Anthony", "test": false, "sel": 4, "sel_odds": 2.07, "sel_type": "Bet Builder", "match": "Αλαβές–Ατλέτικο 1-2", "market": "Goal/Goal", "pick": "Goal/Goal", "result": "Σωστό"}, {"id": "R3-anthony-4b", "coupon_id": "R3-anthony", "weekend": "2026-10-09", "player": "Anthony", "test": false, "sel": 4, "sel_odds": 2.07, "sel_type": "Bet Builder", "match": "Αλαβές–Ατλέτικο 1-2", "market": "Κάρτες", "pick": "Κάρτα και οι δύο ομάδες", "result": "Σωστό"}, {"id": "R3-dorch-1a", "coupon_id": "R3-dorch", "weekend": "2026-10-09", "player": "Dorch", "test": false, "sel": 1, "sel_odds": 5.0, "sel_type": "Bet Builder", "match": "Μάν. Γιουν.–Τότεναμ 1-1", "market": "Σουτ στο τέρμα", "pick": "Mbeumo 1+ σουτ στο τέρμα", "result": "Σωστό"}, {"id": "R3-dorch-1b", "coupon_id": "R3-dorch", "weekend": "2026-10-09", "player": "Dorch", "test": false, "sel": 1, "sel_odds": 5.0, "sel_type": "Bet Builder", "match": "Μάν. Γιουν.–Τότεναμ 1-1", "market": "Σουτ στο τέρμα", "pick": "Bruno Fernandes 1+ σουτ στο τέρμα", "result": "Λάθος"}, {"id": "R3-dorch-1c", "coupon_id": "R3-dorch", "weekend": "2026-10-09", "player": "Dorch", "test": false, "sel": 1, "sel_odds": 5.0, "sel_type": "Bet Builder", "match": "Μάν. Γιουν.–Τότεναμ 1-1", "market": "Over γκολ (έως 1.5)", "pick": "Over 1.5", "result": "Σωστό"}, {"id": "R3-dorch-1d", "coupon_id": "R3-dorch", "weekend": "2026-10-09", "player": "Dorch", "test": false, "sel": 1, "sel_odds": 5.0, "sel_type": "Bet Builder", "match": "Μάν. Γιουν.–Τότεναμ 1-1", "market": "Κάρτες", "pick": "Τότεναμ Over 1.5 κάρτες", "result": "Σωστό"}, {"id": "R3-dorch-1e", "coupon_id": "R3-dorch", "weekend": "2026-10-09", "player": "Dorch", "test": false, "sel": 1, "sel_odds": 5.0, "sel_type": "Bet Builder", "match": "Μάν. Γιουν.–Τότεναμ 1-1", "market": "Αποκρούσεις", "pick": "Lammens 2+ αποκρούσεις", "result": "Σωστό"}, {"id": "R3-dorch-1f", "coupon_id": "R3-dorch", "weekend": "2026-10-09", "player": "Dorch", "test": false, "sel": 1, "sel_odds": 5.0, "sel_type": "Bet Builder", "match": "Μάν. Γιουν.–Τότεναμ 1-1", "market": "Νίκη", "pick": "Μάν. Γιουν. νίκη", "result": "Λάθος"}, {"id": "R3-shimis-1a", "coupon_id": "R3-shimis", "weekend": "2026-10-09", "player": "Shimis", "test": false, "sel": 1, "sel_odds": 3.3, "sel_type": "Μονή", "match": "Ολυμπιακός–Παναθηναϊκός 1-0", "market": "Νίκη", "pick": "Παναθηναϊκός νίκη", "result": "Λάθος"}, {"id": "R3-shimis-2a", "coupon_id": "R3-shimis", "weekend": "2026-10-09", "player": "Shimis", "test": false, "sel": 2, "sel_odds": 1.37, "sel_type": "Μονή", "match": "Κηφισιά–Παναιτωλικός 2-0", "market": "Over γκολ (έως 1.5)", "pick": "Over 1.5", "result": "Σωστό"}, {"id": "R3-pourou-1a", "coupon_id": "R3-pourou", "weekend": "2026-10-09", "player": "Pourou", "test": false, "sel": 1, "sel_odds": 1.55, "sel_type": "Bet Builder", "match": "Τσέλσι–Μπόρνμουθ 5-1", "market": "Σουτ στο τέρμα", "pick": "Τσέλσι Over 1.5 σουτ στο τέρμα 1ο ημ.", "result": "Σωστό"}, {"id": "R3-pourou-1b", "coupon_id": "R3-pourou", "weekend": "2026-10-09", "player": "Pourou", "test": false, "sel": 1, "sel_odds": 1.55, "sel_type": "Bet Builder", "match": "Τσέλσι–Μπόρνμουθ 5-1", "market": "Σουτ στο τέρμα", "pick": "Μπόρνμουθ Over 0.5 σουτ στο τέρμα 1ο ημ.", "result": "Σωστό"}, {"id": "R3-pourou-2a", "coupon_id": "R3-pourou", "weekend": "2026-10-09", "player": "Pourou", "test": false, "sel": 2, "sel_odds": 1.64, "sel_type": "Bet Builder", "match": "Σάντερλαντ–Μπράιτον 0-2", "market": "Σουτ στο τέρμα", "pick": "Μπράιτον Over 0.5 σουτ στο τέρμα 1ο ημ.", "result": "Σωστό"}, {"id": "R3-pourou-2b", "coupon_id": "R3-pourou", "weekend": "2026-10-09", "player": "Pourou", "test": false, "sel": 2, "sel_odds": 1.64, "sel_type": "Bet Builder", "match": "Σάντερλαντ–Μπράιτον 0-2", "market": "Κόρνερ", "pick": "Over 3 κόρνερ 1ο ημ.", "result": "Σωστό"}, {"id": "R3-pourou-3a", "coupon_id": "R3-pourou", "weekend": "2026-10-09", "player": "Pourou", "test": false, "sel": 3, "sel_odds": 2.0, "sel_type": "Bet Builder", "match": "Βίλα–Μπρέντφορντ 2-2", "market": "Νίκη σε ημίχρονο", "pick": "Βίλα νίκη σε ημίχρονο", "result": "Λάθος"}, {"id": "R3-pourou-3b", "coupon_id": "R3-pourou", "weekend": "2026-10-09", "player": "Pourou", "test": false, "sel": 3, "sel_odds": 2.0, "sel_type": "Bet Builder", "match": "Βίλα–Μπρέντφορντ 2-2", "market": "Κάρτες", "pick": "Over 1 κάρτες", "result": "Σωστό"}, {"id": "R3-aggelos-1a", "coupon_id": "R3-aggelos", "weekend": "2026-10-09", "player": "Aggelos", "test": false, "sel": 1, "sel_odds": 1.95, "sel_type": "Bet Builder", "match": "Ουνιόν–Έλβερσμπεργκ 1-0", "market": "Over γκολ (2+)", "pick": "Over 2.5", "result": "Λάθος"}, {"id": "R3-aggelos-1b", "coupon_id": "R3-aggelos", "weekend": "2026-10-09", "player": "Aggelos", "test": false, "sel": 1, "sel_odds": 1.95, "sel_type": "Bet Builder", "match": "Ουνιόν–Έλβερσμπεργκ 1-0", "market": "Σουτ στο τέρμα", "pick": "Laté Lath 1+ σουτ στο τέρμα (άκυρο)", "result": "Επιστροφή"}, {"id": "R3-aggelos-2a", "coupon_id": "R3-aggelos", "weekend": "2026-10-09", "player": "Aggelos", "test": false, "sel": 2, "sel_odds": 1.33, "sel_type": "Μονή", "match": "Κολωνία–Γκλάντμπαχ 2-1", "market": "Διπλή ευκαιρία", "pick": "1Χ", "result": "Σωστό"}, {"id": "R3-aggelos-3a", "coupon_id": "R3-aggelos", "weekend": "2026-10-09", "player": "Aggelos", "test": false, "sel": 3, "sel_odds": 1.82, "sel_type": "Bet Builder", "match": "Μάιντς–Λεβερκούζεν 3-4", "market": "Σουτ στο τέρμα", "pick": "Schick 1+ σουτ στο τέρμα", "result": "Σωστό"}, {"id": "R3-aggelos-3b", "coupon_id": "R3-aggelos", "weekend": "2026-10-09", "player": "Aggelos", "test": false, "sel": 3, "sel_odds": 1.82, "sel_type": "Bet Builder", "match": "Μάιντς–Λεβερκούζεν 3-4", "market": "Goal/Goal", "pick": "Goal/Goal", "result": "Σωστό"}], "rounds": [{"weekend": "2026-09-18", "group_odds": 3249.59, "stake": 10}, {"weekend": "2026-10-09", "end": "2026-10-12", "group_odds": 3074.33, "stake": 10}]};
+(function(){
+  const calcs = [], cbs = [], store = Object.assign({}, window.__DATA__);
+  const colors = ['#2563eb', '#d946ef', '#f59e0b', '#14b8a6', '#ef4444'];
+  window.dash = {
+    colors: colors,
+    calc: (id, o) => calcs.push([id, o]),
+    onData: f => cbs.push(f),
+    setLink: id => { try { history.replaceState(null, '', '#' + id); } catch (e) {} },
+    data: id => store[id] !== undefined ? { status: 'ok', data: store[id] } : { status: 'missing', data: [] },
+    __run: () => { calcs.forEach(([id, o]) => { store[id] = o.fn(...o.inputs.map(i => store[i] || [])); }); cbs.forEach(f => f()); }
+  };
+  let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => cbs.forEach(f => f()), 150); });
+})();
+</script>
+<script>
+(function () {
+  const OK = 'Σωστό', NO = 'Λάθος';
+  const off = x => x.id !== 'template' && !x.test;
+
+  dash.calc('team_weeks', {
+    title: 'Η ομάδα ανά αγωνιστική',
+    description: 'Για κάθε επίσημο Σαββατοκύριακο: κουπόνια, πόσα βγήκαν, σημεία, πόσα σημεία έριξαν το ομαδικό, απόδοση του ομαδικού (η πραγματική του δελτίου όταν την έχουμε, αλλιώς το γινόμενο των αποδόσεων) και ταμείο (10€ στο ομαδικό, κερδίζει μόνο αν βγουν όλα).',
+    inputs: ['coupons', 'rounds'],
+    fn: (coupons, rounds) => {
+      const done = coupons.filter(x => x.id !== 'template' && !x.test);
+      const weeks = Array.from(new Set(done.map(x => x.weekend))).sort();
+      return weeks.map(w => {
+        const real = rounds.find(r => r.weekend === w);
+        const c = done.filter(x => x.weekend === w);
+        const hit = c.filter(x => x.status === 'Κέρδισε').length;
+        const picks = c.reduce((s, x) => s + Number(x.picks), 0);
+        const picksWon = c.reduce((s, x) => s + Number(x.picks_won), 0);
+        const combo = real ? Number(real.group_odds) : Math.round(c.reduce((p, x) => p * Number(x.odds), 1) * 100) / 100;
+        const all = hit === c.length;
+        return { weekend: w, total: c.length, hit: hit, all_hit: all, picks: picks, picks_won: picksWon, fails: picks - picksWon,
+          combo_odds: combo, real_odds: !!real, stake: 10, payout: all ? Math.round(10 * combo * 100) / 100 : 0 };
+      });
+    }
+  });
+
+  dash.calc('team', {
+    title: 'Η ομάδα συνολικά',
+    description: 'Αγωνιστικές, τελευταία αγωνιστική, κουπόνια και σημεία που βγήκαν, και ταμείο του ομαδικού.',
+    inputs: ['team_weeks'],
+    fn: (team_weeks) => {
+      const coupons = team_weeks.reduce((s, w) => s + w.total, 0);
+      const won = team_weeks.reduce((s, w) => s + w.hit, 0);
+      const picks = team_weeks.reduce((s, w) => s + w.picks, 0);
+      const picksWon = team_weeks.reduce((s, w) => s + w.picks_won, 0);
+      const last = team_weeks[team_weeks.length - 1];
+      const invested = team_weeks.reduce((s, w) => s + w.stake, 0);
+      const returned = Math.round(team_weeks.reduce((s, w) => s + w.payout, 0) * 100) / 100;
+      return [{ weeks: team_weeks.length, perfect: team_weeks.filter(w => w.all_hit).length,
+        last_hit: last ? last.hit : null, last_total: last ? last.total : null, last_fails: last ? last.fails : null,
+        coupons: coupons, won: won, win_rate: coupons ? won / coupons : null,
+        picks: picks, picks_won: picksWon, pick_rate: picks ? picksWon / picks : null,
+        invested: invested, returned: returned, net: Math.round((returned - invested) * 100) / 100 }];
+    }
+  });
+
+  dash.calc('profiles', {
+    title: 'Οι παίκτες',
+    description: 'Ανά παίκτη (επίσημες αγωνιστικές): σωστά και λάθος κουπόνια, ποσοστό κουπονιών και σημείων που βγήκαν, μέση απόδοση, κουπόνια που χάθηκαν για ένα σημείο, φόρμα, και η αγορά με το καλύτερο και το χειρότερο ποσοστό (από 2 σημεία και πάνω).',
+    inputs: ['players', 'coupons', 'legs'],
+    fn: (players, coupons, legs) => {
+      const done = coupons.filter(x => x.id !== 'template' && !x.test);
+      const dl = legs.filter(x => x.id !== 'template' && !x.test && (x.result === 'Σωστό' || x.result === 'Λάθος'));
+      return players.map(p => {
+        const c = done.filter(x => x.player === p.player).sort((a, b) => String(a.weekend).localeCompare(String(b.weekend)));
+        const won = c.filter(x => x.status === 'Κέρδισε').length;
+        const picks = c.reduce((s, x) => s + Number(x.picks), 0);
+        const picksWon = c.reduce((s, x) => s + Number(x.picks_won), 0);
+        const by = {};
+        dl.filter(x => x.player === p.player).forEach(x => {
+          const g = by[x.market] || (by[x.market] = { m: x.market, n: 0, ok: 0 });
+          g.n += 1; if (x.result === 'Σωστό') g.ok += 1;
+        });
+        const ms = Object.values(by).filter(g => g.n >= 2).map(g => Object.assign(g, { r: g.ok / g.n }));
+        const best = ms.slice().sort((a, b) => b.r - a.r || b.n - a.n)[0];
+        const worst = ms.slice().sort((a, b) => a.r - b.r || b.n - a.n)[0];
+        return { player: p.player, league: p.league, coupons: c.length, won: won, lost: c.length - won, picks: picks, picks_won: picksWon,
+          win_rate: c.length ? won / c.length : null, pick_rate: picks ? picksWon / picks : null,
+          avg_odds: c.length ? Math.round(c.reduce((s, x) => s + Number(x.odds), 0) / c.length * 100) / 100 : null,
+          near_miss: c.filter(x => x.status === 'Έχασε' && Number(x.picks) - Number(x.picks_won) === 1).length,
+          form: c.slice(-5).map(x => x.status === 'Κέρδισε' ? 'Σ' : 'Λ').join(''),
+          strong: best ? best.m : null, strong_score: best ? best.ok + '/' + best.n : null,
+          weak: worst && worst.r < 1 && (!best || worst.m !== best.m) ? worst.m : null,
+          weak_score: worst && worst.r < 1 && (!best || worst.m !== best.m) ? worst.ok + '/' + worst.n : null };
+      });
+    }
+  });
+
+  dash.calc('markets', {
+    title: 'Τι μας βγαίνει ανά αγορά',
+    description: 'Όλα τα σημεία των επίσημων αγωνιστικών, ανά αγορά: πόσα παίχτηκαν, πόσα βγήκαν και πώς πάει ο καθένας σε αυτήν. Χωρίς σημεία που δεν επιβεβαιώθηκαν ή ακυρώθηκαν.',
+    inputs: ['legs'],
+    fn: (legs) => {
+      const dl = legs.filter(x => x.id !== 'template' && !x.test && (x.result === 'Σωστό' || x.result === 'Λάθος'));
+      const by = {};
+      dl.forEach(x => {
+        const g = by[x.market] || (by[x.market] = { market: x.market, legs: 0, won: 0, who: {} });
+        g.legs += 1; if (x.result === 'Σωστό') g.won += 1;
+        const p = g.who[x.player] || (g.who[x.player] = [0, 0]); p[1] += 1; if (x.result === 'Σωστό') p[0] += 1;
+      });
+      return Object.values(by).map(g => ({ market: g.market, legs: g.legs, won: g.won, rate: g.won / g.legs,
+        players: Object.keys(g.who).sort((a, b) => g.who[b][0] / g.who[b][1] - g.who[a][0] / g.who[a][1] || g.who[b][1] - g.who[a][1])
+          .map(k => k + ' ' + g.who[k][0] + '/' + g.who[k][1]).join(', ') })).sort((a, b) => b.rate - a.rate || b.legs - a.legs);
+    }
+  });
+
+  dash.calc('sel_types', {
+    title: 'Μονή επιλογή ή Bet Builder',
+    description: 'Κάθε επιλογή του δελτίου (ένα ματς) στις επίσημες αγωνιστικές: βγήκε αν βγήκαν όλα τα σημεία της. Χωρίς επιλογές με σημείο που δεν επιβεβαιώθηκε.',
+    inputs: ['legs'],
+    fn: (legs) => {
+      const l = legs.filter(x => x.id !== 'template' && !x.test);
+      const sels = {};
+      l.forEach(x => {
+        const k = x.coupon_id + '#' + x.sel;
+        const s = sels[k] || (sels[k] = { type: x.sel_type, no: 0, unk: 0 });
+        if (x.result === 'Λάθος') s.no += 1; if (x.result === 'Άγνωστο') s.unk += 1;
+      });
+      const by = {};
+      Object.values(sels).filter(s => s.no > 0 || s.unk === 0).forEach(s => {
+        const g = by[s.type] || (by[s.type] = { sel_type: s.type, selections: 0, won: 0 });
+        g.selections += 1; if (s.no === 0) g.won += 1;
+      });
+      return Object.values(by).map(g => Object.assign(g, { rate: g.won / g.selections })).sort((a, b) => b.rate - a.rate);
+    }
+  });
+
+  dash.calc('odds_bands', {
+    title: 'Ποσοστό ανά απόδοση επιλογής',
+    description: 'Κάθε επιλογή του δελτίου στις επίσημες αγωνιστικές, ανά απόδοση: πόσες βγήκαν ολόκληρες. Χωρίς επιλογές με σημείο που δεν επιβεβαιώθηκε.',
+    inputs: ['legs'],
+    fn: (legs) => {
+      const l = legs.filter(x => x.id !== 'template' && !x.test);
+      const sels = {};
+      l.forEach(x => {
+        const k = x.coupon_id + '#' + x.sel;
+        const s = sels[k] || (sels[k] = { odds: Number(x.sel_odds), no: 0, unk: 0 });
+        if (x.result === 'Λάθος') s.no += 1; if (x.result === 'Άγνωστο') s.unk += 1;
+      });
+      const bands = [['έως 1.50', 0, 1.50], ['1.51 – 1.70', 1.505, 1.70], ['1.71 – 1.90', 1.705, 1.90], ['πάνω από 1.90', 1.905, 1e9]];
+      const rows = bands.map((b, i) => ({ band: b[0], order: i, selections: 0, won: 0 }));
+      Object.values(sels).filter(s => s.no > 0 || s.unk === 0).forEach(s => {
+        const i = bands.findIndex(b => s.odds >= b[1] && s.odds <= b[2]);
+        rows[i].selections += 1; if (s.no === 0) rows[i].won += 1;
+      });
+      return rows.filter(r => r.selections).map(r => Object.assign(r, { rate: r.won / r.selections }));
+    }
+  });
+
+  dash.calc('bb_size', {
+    title: 'Bet Builder ανά πλήθος σημείων',
+    description: 'Bet Builder των επίσημων αγωνιστικών, ανάλογα με το πόσα σημεία είχαν: πόσα βγήκαν ολόκληρα. Χωρίς όσα έχουν σημείο που δεν επιβεβαιώθηκε.',
+    inputs: ['legs'],
+    fn: (legs) => {
+      const sels = {};
+      legs.filter(x => x.id !== 'template' && !x.test && x.sel_type === 'Bet Builder').forEach(x => {
+        const k = x.coupon_id + '#' + x.sel;
+        const s = sels[k] || (sels[k] = { n: 0, no: 0, unk: 0 });
+        s.n += 1; if (x.result === 'Λάθος') s.no += 1; if (x.result === 'Άγνωστο') s.unk += 1;
+      });
+      const by = {};
+      Object.values(sels).filter(s => s.no > 0 || s.unk === 0).forEach(s => {
+        const key = s.n <= 2 ? '2 σημεία' : s.n === 3 ? '3 σημεία' : '4+ σημεία';
+        const g = by[key] || (by[key] = { size: key, order: Math.min(s.n, 4), selections: 0, won: 0 });
+        g.selections += 1; if (s.no === 0) g.won += 1;
+      });
+      return Object.values(by).sort((a, b) => a.order - b.order).map(g => Object.assign(g, { rate: g.won / g.selections }));
+    }
+  });
+
+  dash.calc('coupon_size', {
+    title: 'Κουπόνια ανά πλήθος επιλογών',
+    description: 'Κουπόνια των επίσημων αγωνιστικών, ανάλογα με το πόσα ματς είχαν: πόσα βγήκαν.',
+    inputs: ['coupons'],
+    fn: (coupons) => {
+      const by = {};
+      coupons.filter(x => x.id !== 'template' && !x.test).forEach(x => {
+        const n = Number(x.selections);
+        const key = n <= 2 ? '1–2 ματς' : n === 3 ? '3 ματς' : '4+ ματς';
+        const g = by[key] || (by[key] = { size: key, order: Math.min(n, 4), selections: 0, won: 0 });
+        g.selections += 1; if (x.status === 'Κέρδισε') g.won += 1;
+      });
+      return Object.values(by).sort((a, b) => a.order - b.order).map(g => Object.assign(g, { rate: g.won / g.selections }));
+    }
+  });
+
+  dash.calc('fail_markets', {
+    title: 'Τι έριξε το ομαδικό',
+    description: 'Όλα τα λάθος σημεία των επίσημων αγωνιστικών, ανά αγορά: πόσα ήταν και τι ποσοστό των λαθών.',
+    inputs: ['legs'],
+    fn: (legs) => {
+      const no = legs.filter(x => x.id !== 'template' && !x.test && x.result === 'Λάθος');
+      const by = {};
+      no.forEach(x => { by[x.market] = (by[x.market] || 0) + 1; });
+      return Object.keys(by).map(k => ({ market: k, fails: by[k], share: by[k] / no.length })).sort((a, b) => b.fails - a.fails);
+    }
+  });
+
+  dash.calc('tests', {
+    title: 'Test bets',
+    description: 'Για κάθε δοκιμαστική αγωνιστική: κουπόνια, πόσα βγήκαν, σημεία, πόσα σημεία έριξαν το ομαδικό και συνδυαστική απόδοση.',
+    inputs: ['coupons'],
+    fn: (coupons) => {
+      const t = coupons.filter(x => x.test);
+      const weeks = Array.from(new Set(t.map(x => x.weekend))).sort();
+      return weeks.map((w, i) => {
+        const c = t.filter(x => x.weekend === w);
+        const picks = c.reduce((s, x) => s + Number(x.picks), 0);
+        const picksWon = c.reduce((s, x) => s + Number(x.picks_won), 0);
+        return { test: 'Test ' + (i + 1), weekend: w, coupons: c.length, hit: c.filter(x => x.status === 'Κέρδισε').length,
+          picks: picks, picks_won: picksWon, fails: picks - picksWon,
+          combo_odds: Math.round(c.reduce((p, x) => p * Number(x.odds), 1) * 100) / 100 };
+      });
+    }
+  });
+
+  dash.calc('standings', {
+    title: 'Βαθμολογία',
+    description: 'Ανά παίκτη (επίσημες αγωνιστικές): κουπόνια, σωστά, λάθος και μονάδες με 1 μονάδα ανά κουπόνι.',
+    inputs: ['players', 'coupons'],
+    fn: (players, coupons) => {
+      const done = coupons.filter(x => x.id !== 'template' && !x.test);
+      const rows = players.map(p => {
+        const c = done.filter(x => x.player === p.player);
+        const won = c.filter(x => x.status === 'Κέρδισε').length;
+        const profit = c.reduce((s, x) => s + (x.status === 'Κέρδισε' ? Number(x.odds) - 1 : -1), 0);
+        return { player: p.player, coupons: c.length, won: won, lost: c.length - won, profit: Math.round(profit * 100) / 100 };
+      });
+      rows.sort((a, b) => b.profit - a.profit || b.won - a.won || a.player.localeCompare(b.player));
+      return rows.map((r, i) => Object.assign({ rank: i + 1 }, r));
+    }
+  });
+
+  const WON = 'Κέρδισε';
+  const pct = d3.format('.0%');
+  const units = v => (v > 0 ? '+' : '') + d3.format('.2f')(v);
+  const odds = v => (v === null || v === undefined || v === '') ? '—' : d3.format('.2f')(Number(v));
+  const eur = v => new Intl.NumberFormat('el', { style: 'currency', currency: 'EUR', maximumFractionDigits: Math.abs(v) >= 1000 ? 0 : 2 }).format(v);
+  const bigOdds = v => v >= 100 ? d3.format('.0f')(v) : d3.format('.2f')(v);
+  const toDate = s => new Date(String(s).slice(0, 10) + 'T00:00:00Z');
+  let ENDS = {};
+  const mon = new Intl.DateTimeFormat('el', { month: 'short', timeZone: 'UTC' });
+  const range = (s, year) => {
+    const a = toDate(s), e = ENDS[s] ? toDate(ENDS[s]) : new Date(a.getTime() + 2 * 864e5);
+    const txt = a.getUTCMonth() === e.getUTCMonth()
+      ? `${a.getUTCDate()}–${e.getUTCDate()} ${mon.format(e)}`
+      : `${a.getUTCDate()} ${mon.format(a)} – ${e.getUTCDate()} ${mon.format(e)}`;
+    return year ? txt + ' ' + e.getUTCFullYear() : txt;
+  };
+  const sign = v => v > 0 ? 'pos' : v < 0 ? 'neg' : '';
+  const tone = r => r >= .7 ? 'good' : r >= .5 ? 'mid' : 'bad';
+  const $ = id => document.getElementById(id);
+  let players = [];
+  const colorOf = name => { const i = players.findIndex(p => p.player === name); return dash.colors[(i < 0 ? 0 : i) % dash.colors.length]; };
+  const orderOf = name => { const i = players.findIndex(p => p.player === name); return i < 0 ? 99 : i; };
+
+  function el(tag, cls, kids, attrs) {
+    const e = document.createElement(tag); if (cls) e.className = cls;
+    if (attrs) Object.keys(attrs).forEach(k => k === 'style' ? Object.assign(e.style, attrs.style) : e.setAttribute(k, attrs[k]));
+    (kids || []).forEach(k => e.appendChild(typeof k === 'string' ? document.createTextNode(k) : k)); return e;
+  }
+  const mk = (src, field, where, text, cls) => el('span', cls || '', [text], { 'data-source': src, 'data-field': field, 'data-where': where });
+  const dot = name => el('span', 'dot', [], { style: { background: colorOf(name) } });
+  const formBadges = f => { const w = el('span', 'form'); String(f || '').split('').forEach(ch => w.appendChild(el('i', ch === 'Σ' ? 'w' : 'l', [ch]))); return w; };
+  function empty(tbody, cols, msg) { tbody.textContent = ''; const c = el('td', 'empty', [msg]); c.colSpan = cols; tbody.appendChild(el('tr', '', [c])); }
+  const rateCell = r => el('td', '', [el('span', 'rate', [el('span', 'tr', [el('i', 'b-' + tone(r), [], { style: { width: Math.round(r * 100) + '%' } })]), el('span', 't-' + tone(r), [pct(r)])])]);
+  const LEG = { 'Σωστό': ['ok', '✓'], 'Λάθος': ['no', '✗'], 'Άγνωστο': ['unk', '?'], 'Επιστροφή': ['push', '↺'] };
+
+  function legsBlock(cid, legs) {
+    const mine = legs.filter(x => x.coupon_id === cid);
+    const box = el('div', 'br-legs');
+    Array.from(new Set(mine.map(x => x.sel))).forEach(s => {
+      const ls = mine.filter(x => x.sel === s);
+      const row = el('div', 'br-lm', [el('b', '', [ls[0].match])]);
+      ls.forEach(x => { const t = LEG[x.result] || ['unk', '?']; row.appendChild(el('span', 'br-leg ' + t[0], [t[1] + ' ' + x.pick])); });
+      box.appendChild(row);
+    });
+    return box;
+  }
+
+  function drawBars(box, rows, cfg) {
+    box.textContent = '';
+    if (!rows.length) { box.appendChild(el('div', 'empty', ['Το γράφημα ξεκινά μετά την πρώτη αγωνιστική.'])); return; }
+    const tip = el('div', 'br-tip'); box.appendChild(tip);
+    const W = Math.max(300, box.clientWidth), H = cfg.h || 240, top = 40, bot = 26;
+    const rate = r => cfg.total(r) ? cfg.hit(r) / cfg.total(r) : 0;
+    const y = d3.scaleLinear([0, 1], [H - bot, top]);
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).style('display', 'block');
+    const ticks = [0, .25, .5, .75, 1];
+    const probe = svg.append('text').style('font-size', 'var(--cds-font-size-caption)').text('100%');
+    const left = Math.ceil(probe.node().getComputedTextLength ? probe.node().getComputedTextLength() : 30) + 12; probe.remove();
+    const x = d3.scaleBand(rows.map(r => r.weekend), [left, W - 4]).paddingInner(.35).paddingOuter(.2);
+    const bw = Math.min(44, x.bandwidth());
+    const cx = w => x(w) + x.bandwidth() / 2;
+    svg.append('g').selectAll('line').data(ticks).join('line').attr('x1', left).attr('x2', W - 4)
+      .attr('y1', d => y(d)).attr('y2', d => y(d)).attr('stroke', d => d === .5 ? 'var(--cds-chart-reference)' : 'var(--cds-chart-grid)')
+      .attr('stroke-dasharray', d => d === .5 ? '4 3' : null);
+    svg.append('g').selectAll('text').data(ticks).join('text').attr('x', left - 8).attr('y', d => y(d) + 4)
+      .attr('text-anchor', 'end').style('fill', 'var(--color-fg-muted)').style('font-size', 'var(--cds-font-size-caption)').text(d => pct(d));
+    svg.append('g').selectAll('rect').data(rows).join('rect').attr('x', r => cx(r.weekend) - bw / 2).attr('width', bw)
+      .attr('y', y(1)).attr('height', y(0) - y(1)).attr('rx', 4).attr('fill', 'var(--cds-chart-muted)').attr('opacity', .18);
+    svg.append('g').selectAll('rect').data(rows).join('rect').attr('x', r => cx(r.weekend) - bw / 2).attr('width', bw)
+      .attr('y', r => y(rate(r))).attr('height', r => y(0) - y(rate(r))).attr('rx', 4)
+      .attr('fill', r => cfg.gold && cfg.gold(r) ? '#c9971c' : 'var(--color-ok)');
+    if (rows.length > 1) {
+      svg.append('path').attr('d', d3.line()(rows.map(r => [cx(r.weekend), y(rate(r))]))).attr('fill', 'none')
+        .attr('stroke', 'var(--color-fg)').attr('stroke-width', 1.5).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round').attr('opacity', .55);
+      svg.append('g').selectAll('circle').data(rows).join('circle').attr('cx', r => cx(r.weekend)).attr('cy', r => y(rate(r))).attr('r', 3.5)
+        .attr('fill', 'var(--color-fg)').attr('opacity', .7);
+    }
+    const lab = svg.append('g').selectAll('text').data(rows).join('text').attr('x', r => cx(r.weekend)).attr('y', r => y(rate(r)) - 22)
+      .attr('text-anchor', 'middle').style('font-size', 'var(--cds-font-size-caption)');
+    lab.append('tspan').style('font-weight', 800).style('fill', r => r && cfg.gold && cfg.gold(r) ? '#c9971c' : 'var(--color-' + (rate(r) >= .7 ? 'ok' : rate(r) >= .5 ? 'warn' : 'bad') + ')').text(r => pct(rate(r)));
+    lab.append('tspan').attr('x', r => cx(r.weekend)).attr('dy', '1.15em').style('fill', 'var(--color-fg-muted)').text(r => cfg.hit(r) + '/' + cfg.total(r));
+    const every = Math.max(1, Math.ceil(rows.length / Math.max(1, Math.floor((W - left) / 64))));
+    svg.append('g').selectAll('text').data(rows.filter((r, i) => i % every === 0)).join('text').attr('x', r => cx(r.weekend)).attr('y', H - 6)
+      .attr('text-anchor', 'middle').style('fill', 'var(--color-fg-muted)').style('font-size', 'var(--cds-font-size-caption)').text(r => range(r.weekend));
+    svg.append('g').selectAll('rect').data(rows).join('rect').attr('x', r => x(r.weekend)).attr('width', x.bandwidth()).attr('y', 0).attr('height', H)
+      .attr('fill', 'transparent')
+      .on('mousemove', function (ev, r) {
+        tip.textContent = '';
+        tip.appendChild(el('div', 'br-tip-h', [range(r.weekend, true)]));
+        cfg.tip(r).forEach(line => tip.appendChild(el('div', '', [line])));
+        tip.style.display = 'block';
+        const k = box.clientWidth / W; let tx = cx(r.weekend) * k + 14;
+        if (tx + tip.offsetWidth > box.clientWidth) tx = cx(r.weekend) * k - tip.offsetWidth - 14;
+        tip.style.left = Math.max(0, tx) + 'px'; tip.style.top = '4px';
+      })
+      .on('mouseleave', () => { tip.style.display = 'none'; });
+  }
+
+  function card(p) {
+    const w = 'player=' + encodeURIComponent(p.player);
+    const m = (f, t, c) => mk('profiles', f, w, t, c);
+    const c = el('article', 'br-card'); c.style.setProperty('--c', colorOf(p.player));
+    const fh = m('form', ''); fh.textContent = ''; fh.appendChild(formBadges(p.form));
+    c.appendChild(el('div', 'br-card-h', [el('div', '', [el('div', 'n', [m('player', p.player)]), el('div', 'mut', [m('league', p.league)])]), fh]));
+    const meter = (label, rateF, rate, aF, a, bF, b) => el('div', 'br-meter', [
+      el('div', 'top', [el('span', 'v', [m(rateF, rate === null ? '—' : pct(rate))]), el('span', 'c', [m(aF, String(a)), '/', m(bF, String(b))])]),
+      el('div', 'l', [label]), el('div', 'tr', [el('i', '', [], { style: { width: Math.round((rate || 0) * 100) + '%' } })])]);
+    c.appendChild(el('div', 'br-meters', [
+      meter('κουπόνια βγήκαν', 'win_rate', p.win_rate, 'won', p.won, 'coupons', p.coupons),
+      meter('σημεία βγήκαν', 'pick_rate', p.pick_rate, 'picks_won', p.picks_won, 'picks', p.picks)]));
+    const fact = (label, f, t) => el('div', '', [el('div', 'v', [m(f, t)]), el('div', 'l', [label])]);
+    c.appendChild(el('div', 'br-facts', [fact('μέση απόδοση', 'avg_odds', odds(p.avg_odds)), fact('λάθος κουπόνια', 'lost', String(p.lost)), fact('παρά λίγο', 'near_miss', String(p.near_miss))]));
+    const sw = (label, f, sf, name, score, cls) => el('div', '', [el('span', 'k', [label]), el('span', 'm', [m(f, name || '—')]), score ? el('span', 's ' + cls, [m(sf, score)]) : el('span', '', [])]);
+    c.appendChild(el('div', 'br-sw', [
+      sw('Δυνατό σημείο', 'strong', 'strong_score', p.strong, p.strong_score, 't-good'),
+      sw('Αδύναμο σημείο', 'weak', 'weak_score', p.weak, p.weak_score, 't-bad')]));
+    let note;
+    if (!p.coupons) note = 'Δεν έχει κριθεί ακόμα κουπόνι.';
+    else if (p.lost && p.near_miss / p.lost >= .5) note = `${p.near_miss} από τα ${p.lost} χαμένα χάθηκαν για ένα μόνο σημείο.`;
+    else if (p.pick_rate !== null && p.win_rate !== null && p.pick_rate - p.win_rate >= .3) note = 'Τα σημεία βγαίνουν, τα κουπόνια όχι. Ίσως λιγότερα σημεία ανά κουπόνι.';
+    if (note) c.appendChild(el('div', 'br-note', [note]));
+    return c;
+  }
+
+  function roundCard(o, rows, legs, open) {
+    const m = (f, t) => mk(o.src, f, o.where, t);
+    const d = el('details', 'br-round' + (o.perfect ? ' gold' : ''));
+    if (open) d.open = true;
+    const pips = el('span', 'pips', rows.map(r => el('i', r.status === WON ? 'w' : 'l', [], { title: r.player })));
+    d.appendChild(el('summary', '', [
+      el('div', '', [el('div', 'ttl', [o.label]), el('div', 'dt', [range(o.weekend, true)])]),
+      pips, el('span', 'res', [m(o.f.hit, String(o.hit)), '/', m(o.f.total, String(o.total)), ' κουπόνια'])]));
+    const body = el('div', 'br-round-b');
+    const tile = (label, kids) => el('div', '', [el('div', 'v', kids), el('div', 'l', [label])]);
+    body.appendChild(el('div', 'br-rk', [
+      tile('σημεία βγήκαν', [m('picks_won', String(o.picks_won)), '/', m('picks', String(o.picks))]),
+      tile('απόδοση ομαδικού', [m('combo_odds', bigOdds(o.combo_odds))]),
+      o.perfect ? tile('κέρδος ομαδικού', [o.payout !== undefined ? m('payout', eur(o.payout)) : 'βγήκε'])
+        : tile('το ομαδικό χάθηκε για', [m('fails', String(o.fails)), o.fails === 1 ? ' σημείο' : ' σημεία'])]));
+    rows.forEach(r => {
+      const w = 'id=' + encodeURIComponent(r.id);
+      const c = (f, t) => mk('coupons', f, w, t);
+      body.appendChild(el('div', 'br-cp', [
+        el('div', 'br-cp-h', [dot(r.player), el('span', 'nm', [c('player', r.player)]), el('span', 'chip ' + (r.status === WON ? 'w' : 'l'), [c('status', r.status)]),
+          el('span', 'meta', ['απόδοση ', c('odds', odds(r.odds)), ', ', c('picks_won', String(r.picks_won)), '/', c('picks', String(r.picks)), ' σημεία'])]),
+        legsBlock(r.id, legs)]));
+    });
+    d.appendChild(body);
+    return d;
+  }
+
+  function renderTips(mkt, ob, sty, bbs, cs, fm) {
+    const ul = $('tips'); ul.textContent = '';
+    const ok = r => r.status === 'ok' && r.data.length;
+    const B = (src, f, w, t) => el('b', '', [t], { 'data-source': src, 'data-field': f, 'data-where': w });
+    const add = (kind, icon, main, why) => ul.appendChild(el('li', kind, [el('span', 'ic', [icon]), el('div', '', main.concat(why ? [el('span', 'why', why)] : []))]));
+    const rec = (src, key, r, n) => { const w = key + '=' + encodeURIComponent(r[key]); return [B(src, 'won', w, String(r.won)), '/', B(src, n, w, String(r[n]))]; };
+    if (ok(mkt)) {
+      const big = mkt.data.filter(r => r.legs >= 4);
+      const good = big.filter(r => r.rate >= .75).slice(0, 2);
+      good.forEach(r => add('good', '✓', ['Συνεχίστε ', B('markets', 'market', 'market=' + encodeURIComponent(r.market), r.market), ': βγαίνει ', ...rec('markets', 'market', r, 'legs'), ' (', pct(r.rate), ').'],
+        ['Την παίζουν: ' + r.players]));
+      const bad = big.filter(r => r.rate < .6).sort((a, b) => a.rate - b.rate).slice(0, 2);
+      bad.forEach(r => add('bad', '!', ['Προσοχή στο ', B('markets', 'market', 'market=' + encodeURIComponent(r.market), r.market), ': μόνο ', ...rec('markets', 'market', r, 'legs'), ' (', pct(r.rate), ').'],
+        ['Πριν το βάλετε, ρωτήστε όποιον το πιάνει πιο συχνά: ' + r.players]));
+    }
+    if (ok(ob)) {
+      const hi = ob.data.find(r => r.band === 'πάνω από 1.90');
+      const lo = ob.data.find(r => r.band === 'έως 1.50');
+      if (hi && hi.selections >= 3 && hi.rate < .45) add('bad', '!', ['Επιλογές με απόδοση ', B('odds_bands', 'band', 'band=' + encodeURIComponent(hi.band), 'πάνω από 1.90'), ' βγαίνουν μόνο ', ...rec('odds_bands', 'band', hi, 'selections'), '.'],
+        [lo ? `Οι επιλογές έως 1.50 βγαίνουν ${lo.won}/${lo.selections}. Καλύτερα να φτάνετε την απόδοση με σίγουρες επιλογές παρά με μία ρίσκο.` : 'Καλύτερα να φτάνετε την απόδοση με σίγουρες επιλογές παρά με μία ρίσκο.']);
+    }
+    if (ok(sty)) {
+      const s = sty.data.find(r => r.sel_type === 'Μονή'), b = sty.data.find(r => r.sel_type === 'Bet Builder');
+      if (s && b && b.selections >= 4 && s.rate - b.rate >= .1) add('info', 'i', ['Οι μονές επιλογές βγαίνουν ', ...rec('sel_types', 'sel_type', s, 'selections'), ', τα Bet Builder ', ...rec('sel_types', 'sel_type', b, 'selections'), '.'],
+        ['Κάθε σημείο που προσθέτετε σε Bet Builder είναι ένα ακόμα σημείο που μπορεί να χαθεί.']);
+    }
+    if (ok(bbs) && bbs.data.length >= 2) {
+      const two = bbs.data.find(r => r.size === '2 σημεία'), more = bbs.data.filter(r => r.size !== '2 σημεία');
+      const mw = more.reduce((x, r) => x + r.won, 0), mn = more.reduce((x, r) => x + r.selections, 0);
+      if (two && mn >= 2 && two.rate - mw / mn >= .1) add('info', 'i', ['Bet Builder με 2 σημεία βγαίνουν ', ...rec('bb_size', 'size', two, 'selections'), `, με 3 και πάνω ${mw}/${mn}.`], ['Κρατήστε τα Bet Builder μικρά.']);
+    }
+    if (ok(fm)) {
+      const total = fm.data.reduce((x, r) => x + r.fails, 0);
+      const tops = fm.data.filter(r => r.fails === fm.data[0].fails);
+      const parts = [];
+      tops.forEach((r, i) => { const w = 'market=' + encodeURIComponent(r.market);
+        if (i) parts.push(i === tops.length - 1 ? ' και ' : ', ');
+        parts.push(B('fail_markets', 'market', w, r.market), ' (', B('fail_markets', 'fails', w, String(r.fails)), ')'); });
+      add('info', 'i', ['Τα περισσότερα λάθη μας ήρθαν από ', ...parts, ` σε σύνολο ${total} λαθών.`], [tops.length > 1 ? 'Δείτε πιο προσεκτικά αυτές τις αγορές πριν το επόμενο δελτίο.' : 'Δείτε πιο προσεκτικά αυτή την αγορά πριν το επόμενο δελτίο.']);
+    }
+    if (!ul.children.length) add('info', 'i', ['Μόλις μαζευτούν περισσότερα σημεία θα εμφανιστούν εδώ συμβουλές για το επόμενο δελτίο.'], null);
+  }
+
+  function smallTable(tbody, res, keyField) {
+    if (res.status === 'ok' && res.data.length) {
+      tbody.textContent = '';
+      res.data.forEach(r => tbody.appendChild(el('tr', r.selections < 3 ? 'small' : '', [el('td', 'l nm', [r[keyField]]), el('td', '', [String(r.won)]), el('td', '', [String(r.selections)]), rateCell(r.rate)])));
+    } else empty(tbody, 4, 'Δεν υπάρχουν ακόμα δεδομένα.');
+  }
+
+  document.querySelectorAll('.br-nav a').forEach(a => a.addEventListener('click', ev => {
+    ev.preventDefault();
+    const t = document.getElementById(a.dataset.go);
+    if (t) { t.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); dash.setLink(t.id); }
+  }));
+  let linked = false;
+
+  dash.onData(() => {
+    const P = dash.data('players'), C = dash.data('coupons'), L = dash.data('legs'), tm = dash.data('team'), tw = dash.data('team_weeks'),
+      pr = dash.data('profiles'), mkt = dash.data('markets'), sty = dash.data('sel_types'), ob = dash.data('odds_bands'),
+      ts = dash.data('tests'), st = dash.data('standings'), RD = dash.data('rounds');
+    players = P.status === 'ok' ? P.data : [];
+    ENDS = {}; if (RD.status === 'ok') RD.data.forEach(r => { if (r.end) ENDS[r.weekend] = r.end; });
+    const legs = L.status === 'ok' ? L.data : [];
+    const all = C.status === 'ok' ? C.data.filter(x => x.id !== 'template') : [];
+    const byPlayer = (a, b) => orderOf(a.player) - orderOf(b.player);
+
+    // hero
+    if (tm.status === 'ok' && tm.data.length) {
+      const t = tm.data[0];
+      $('season').textContent = t.weeks ? `Σεζόν 2026/27, ${t.weeks} επίσημες αγωνιστικές` : 'Σεζόν 2026/27, πριν τη σέντρα';
+      $('b-hit').textContent = t.last_hit === null ? '—' : String(t.last_hit);
+      $('b-tot').textContent = t.last_total === null ? '—' : String(t.last_total);
+      $('k-rate').textContent = t.win_rate === null ? '—' : pct(t.win_rate);
+      $('k-won').textContent = String(t.won); $('k-cp').textContent = String(t.coupons);
+      $('k-picks').textContent = t.pick_rate === null ? '—' : pct(t.pick_rate);
+      $('k-pw').textContent = String(t.picks_won); $('k-pt').textContent = String(t.picks);
+      $('k-net').textContent = (t.net > 0 ? '+' : '') + eur(t.net); $('k-net').className = 'v ' + sign(t.net);
+    }
+    const slots = $('slots'); slots.textContent = '';
+    if (tw.status === 'ok' && tw.data.length) {
+      const lw = tw.data[tw.data.length - 1];
+      $('board-t').textContent = 'Αγωνιστική ' + tw.data.length;
+      $('board-d').textContent = range(lw.weekend, true);
+      $('b-take').textContent = lw.all_hit ? `Πιάσαμε όλοι! Το ομαδικό έδωσε ${eur(lw.payout)}.`
+        : `Το ομαδικό χάθηκε για ${lw.fails} ${lw.fails === 1 ? 'σημείο' : 'σημεία'}. Αν έβγαινε, θα έδινε ${eur(10 * lw.combo_odds)} με 10€.`;
+      all.filter(x => !x.test && x.weekend === lw.weekend).sort(byPlayer).forEach(r => {
+        const wn = r.status === WON;
+        slots.appendChild(el('div', 'br-slot ' + (wn ? 'w' : 'l'), [el('div', 'ic', [wn ? '✓' : '✗']), el('div', 'nm', [r.player]), el('div', 'od', ['@' + odds(r.odds)])], { title: `${r.player}: ${r.status}, ${r.picks_won}/${r.picks} σημεία` }));
+      });
+    } else { $('b-take').textContent = 'Η πρώτη επίσημη αγωνιστική θα εμφανιστεί εδώ.'; }
+
+    // players
+    const cards = $('cards'); cards.textContent = '';
+    if (pr.status === 'ok') pr.data.forEach(p => cards.appendChild(card(p)));
+
+    // learn
+    const mb = $('mk-body');
+    if (mkt.status === 'ok' && mkt.data.length) {
+      mb.textContent = '';
+      mkt.data.forEach(r => mb.appendChild(el('tr', r.legs < 3 ? 'small' : '', [el('td', 'l nm', [r.market]), el('td', '', [String(r.won)]), el('td', '', [String(r.legs)]),
+        rateCell(r.rate), el('td', 'who', [r.players])])));
+    } else empty(mb, 5, 'Δεν υπάρχουν ακόμα σημεία.');
+    smallTable($('st2-body'), sty, 'sel_type');
+    smallTable($('ob-body'), ob, 'band');
+    const bbs = dash.data('bb_size'), cs = dash.data('coupon_size'), fm = dash.data('fail_markets');
+    smallTable($('bb-body'), bbs, 'size');
+    smallTable($('cs-body'), cs, 'size');
+    const fb = $('fails'); fb.textContent = '';
+    if (fm.status === 'ok' && fm.data.length) {
+      const mx = fm.data[0].fails;
+      fm.data.forEach(r => { const w = 'market=' + encodeURIComponent(r.market);
+        fb.appendChild(el('div', 'br-fail', [mk('fail_markets', 'market', w, r.market, 'nm'), el('span', 'tr', [el('i', '', [], { style: { width: Math.round(r.fails / mx * 100) + '%' } })]),
+          el('span', 'n', [mk('fail_markets', 'fails', w, String(r.fails)), ' ', el('small', '', [mk('fail_markets', 'share', w, '(' + pct(r.share) + ')')])])])); });
+    } else fb.appendChild(el('div', 'empty', ['Δεν υπάρχουν ακόμα λάθος σημεία.']));
+    renderTips(mkt, ob, sty, bbs, cs, fm);
+
+    // rounds
+    const rb = $('rounds-box'); rb.textContent = '';
+    if (tw.status === 'ok' && tw.data.length) {
+      tw.data.map((w, i) => Object.assign({ label: 'Αγωνιστική ' + (i + 1) }, w)).reverse().forEach((w, i) => rb.appendChild(roundCard({
+        label: w.label, weekend: w.weekend, hit: w.hit, total: w.total, picks: w.picks, picks_won: w.picks_won, combo_odds: w.combo_odds,
+        fails: w.fails, payout: w.payout, src: 'team_weeks', where: 'weekend=' + encodeURIComponent(w.weekend), f: { hit: 'hit', total: 'total' }, perfect: w.all_hit },
+        all.filter(x => !x.test && x.weekend === w.weekend).sort(byPlayer), legs, i === 0)));
+    } else rb.appendChild(el('div', 'empty', ['Η πρώτη επίσημη αγωνιστική θα εμφανιστεί εδώ.']));
+
+    // chart
+    const ch = $('chart'), ch2 = $('chart2');
+    if (tw.status === 'ok') {
+      drawBars(ch, tw.data, { total: r => r.total, hit: r => r.hit, gold: r => r.all_hit,
+        tip: r => [`Κουπόνια: ${r.hit}/${r.total} (${pct(r.hit / r.total)})` + (r.all_hit ? ', πιάσαμε όλοι' : ''), `Απόδοση ομαδικού: ${bigOdds(r.combo_odds)}`,
+          r.all_hit ? `Κέρδος: ${eur(r.payout)}` : `Θα έδινε ${eur(10 * r.combo_odds)} με 10€`] });
+      drawBars(ch2, tw.data, { total: r => r.picks, hit: r => r.picks_won,
+        tip: r => [`Σημεία: ${r.picks_won}/${r.picks} (${pct(r.picks_won / r.picks)})`, `Λάθος σημεία: ${r.fails}`] });
+    } else { ch.textContent = ''; ch2.textContent = ''; }
+
+    // tests
+    const tsb = $('tests-box'); tsb.textContent = '';
+    if (ts.status === 'ok' && ts.data.length) {
+      ts.data.forEach(t => tsb.appendChild(roundCard({
+        label: t.test, weekend: t.weekend, hit: t.hit, total: t.coupons, picks: t.picks, picks_won: t.picks_won, combo_odds: t.combo_odds,
+        fails: t.fails, src: 'tests', where: 'test=' + encodeURIComponent(t.test), f: { hit: 'hit', total: 'coupons' }, perfect: t.hit === t.coupons },
+        all.filter(x => x.test && x.weekend === t.weekend).sort(byPlayer), legs, false)));
+    } else tsb.appendChild(el('div', 'empty', ['Δεν υπάρχουν test bets.']));
+
+    // standings
+    const sb = $('st-body');
+    if (st.status === 'ok') {
+      sb.textContent = '';
+      st.data.forEach(r => sb.appendChild(el('tr', '', [el('td', 'l', [String(r.rank)]), el('td', 'l', [dot(r.player), el('span', 'nm', [r.player])]),
+        el('td', '', [String(r.coupons)]), el('td', '', [String(r.won)]), el('td', '', [String(r.lost)]),
+        el('td', 'nm ' + sign(r.profit), [units(r.profit)])])));
+    } else empty(sb, 6, '—');
+    const fold = document.querySelector('.br-fold');
+    if (fold && !fold.dataset.wired) { fold.dataset.wired = '1'; fold.addEventListener('toggle', () => { fold.querySelector('.tg').textContent = fold.open ? 'Απόκρυψη' : 'Εμφάνιση'; }); }
+
+    if (!linked && tw.status === 'ok') {
+      linked = true;
+      const named = document.getElementById(location.hash.slice(1));
+      if (named) named.scrollIntoView();
+    }
+  });
+})();
+</script>
+<script>dash.__run();</script>
+</body></html>
