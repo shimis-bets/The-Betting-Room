@@ -245,9 +245,7 @@ html,body{background:#ece9f3!important}@media (prefers-color-scheme: dark){html,
 .br-round.gold .br-round-say { background: color-mix(in srgb, var(--gold) 14%, transparent); }
 /* standings */
 .br .rk { display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 6px; font-weight: 800; font-size: .78rem; background: var(--color-panel); border: 1px solid var(--line); }
-.br tr.r1 .rk { background: var(--gold); color: #1a1300; border-color: transparent; }
-.br tr.r2 .rk { background: #9aa3ad; color: #111; border-color: transparent; }
-.br tr.r3 .rk { background: #b0703c; color: #1a0d00; border-color: transparent; }
+
 .br-fold > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .br-fold > summary::-webkit-details-marker { display: none; }
 .br-fold > summary .tg { font-size: .78rem; color: var(--win); font-weight: 700; }
@@ -990,7 +988,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (Î
     if (st.status === 'ok') {
       sb.textContent = '';
       st.data.forEach(r => { const fm = formBadges(r.form);
-        sb.appendChild(el('tr', r.coupons && r.rank <= 3 ? 'r' + r.rank : '', [el('td', 'l', [el('span', 'rk', [String(r.rank)])]), el('td', 'l', [dot(r.player), el('span', 'nm', [r.player])]),
+        sb.appendChild(el('tr', '', [el('td', 'l', [el('span', 'rk', [String(r.rank)])]), el('td', 'l', [dot(r.player), el('span', 'nm', [r.player])]),
           el('td', '', [String(r.coupons)]), el('td', '', [String(r.won)]), el('td', '', [String(r.lost)]),
           el('td', '', [r.pick_rate === null ? 'â€”' : `${r.picks_won}/${r.picks} (${pct(r.pick_rate)})`]), el('td', 'hide-s', [fm]),
           el('td', 'nm ' + sign(r.profit), [units(r.profit)])])); });
