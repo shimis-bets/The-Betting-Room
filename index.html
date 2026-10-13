@@ -151,7 +151,7 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 .br-fail .n { font-weight: 800; min-width: 5.5em; text-align: right; }
 .br-fail .n small { color: var(--muted); font-weight: 600; }
 .br-ai { margin-bottom: 10px; }
-.br-ai-t { display: flex; align-items: center; gap: 8px; font-size: var(--cds-font-size-body); font-weight: 800; }
+.br-h .br-ai-t { display: flex; align-items: center; gap: 8px; }
 .br-ai-b { font-size: .68rem; font-weight: 800; letter-spacing: .04em; color: #fff; background: linear-gradient(135deg, var(--win), #2563eb); border-radius: 6px; padding: 2px 6px; }
 .br-ai-s { color: var(--muted); font-size: .76rem; margin-top: 2px; }
 /* ---------- chart ---------- */
@@ -238,7 +238,7 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 
   <nav class="br-nav" aria-label="Ενότητες">
     <a href="#players" data-go="players">Παίκτες</a>
-    <a href="#learn" data-go="learn">Τι μας βγαίνει</a>
+    <a href="#learn" data-go="learn">AI Analytics</a>
     <a href="#rounds" data-go="rounds">Αγωνιστικές</a>
     <a href="#weeks" data-go="weeks">Πορεία</a>
     <a href="#tests" data-go="tests">Test bets</a>
@@ -252,11 +252,7 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
   </section>
 
   <section class="br-sec" id="learn">
-    <div class="br-h"><h2>Τι μας βγαίνει</h2><p>Τι λένε τα νούμερά μας για το επόμενο δελτίο. Μετράνε μόνο οι επίσημες αγωνιστικές και μόνο σημεία που επιβεβαιώθηκαν.</p></div>
-    <div class="br-ai">
-      <h3 class="br-ai-t"><span class="br-ai-b">AI</span>Συμβουλές AI Analytics</h3>
-      <p class="br-ai-s">Βγαίνουν αυτόματα από τα στατιστικά μας και ανανεώνονται με κάθε νέα αγωνιστική.</p>
-    </div>
+    <div class="br-h"><h2 class="br-ai-t"><span class="br-ai-b">AI</span>Συμβουλές AI Analytics</h2><p>Βγαίνουν αυτόματα από τα στατιστικά μας και ανανεώνονται με κάθε νέα αγωνιστική. Μετράνε μόνο οι επίσημες αγωνιστικές και σημεία που επιβεβαιώθηκαν.</p></div>
     <ul class="br-tips" id="tips" data-source="markets odds_bands sel_types bb_size coupon_size fail_markets"></ul>
 
     <h3 class="br-h3">Ανά αγορά</h3>
@@ -452,7 +448,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
   });
 
   dash.calc('markets', {
-    title: 'Τι μας βγαίνει ανά αγορά',
+    title: 'Ποσοστό ανά αγορά',
     description: 'Όλα τα σημεία των επίσημων αγωνιστικών, ανά αγορά: πόσα παίχτηκαν, πόσα βγήκαν και πώς πάει ο καθένας σε αυτήν. Χωρίς σημεία που δεν επιβεβαιώθηκαν ή ακυρώθηκαν.',
     inputs: ['legs'],
     fn: (legs) => {
