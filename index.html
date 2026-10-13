@@ -150,6 +150,10 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 .br-fail .tr i { display: block; height: 100%; background: var(--loss); border-radius: 5px; }
 .br-fail .n { font-weight: 800; min-width: 5.5em; text-align: right; }
 .br-fail .n small { color: var(--muted); font-weight: 600; }
+.br-ai { margin-bottom: 10px; }
+.br-ai-t { display: flex; align-items: center; gap: 8px; font-size: var(--cds-font-size-body); font-weight: 800; }
+.br-ai-b { font-size: .68rem; font-weight: 800; letter-spacing: .04em; color: #fff; background: linear-gradient(135deg, var(--win), #2563eb); border-radius: 6px; padding: 2px 6px; }
+.br-ai-s { color: var(--muted); font-size: .76rem; margin-top: 2px; }
 /* ---------- chart ---------- */
 .br-chart { position: relative; min-height: 240px; }
 .br-tip { position: absolute; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius);
@@ -249,6 +253,10 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 
   <section class="br-sec" id="learn">
     <div class="br-h"><h2>Τι μας βγαίνει</h2><p>Τι λένε τα νούμερά μας για το επόμενο δελτίο. Μετράνε μόνο οι επίσημες αγωνιστικές και μόνο σημεία που επιβεβαιώθηκαν.</p></div>
+    <div class="br-ai">
+      <h3 class="br-ai-t"><span class="br-ai-b">AI</span>Συμβουλές AI Analytics</h3>
+      <p class="br-ai-s">Βγαίνουν αυτόματα από τα στατιστικά μας και ανανεώνονται με κάθε νέα αγωνιστική.</p>
+    </div>
     <ul class="br-tips" id="tips" data-source="markets odds_bands sel_types bb_size coupon_size fail_markets"></ul>
 
     <h3 class="br-h3">Ανά αγορά</h3>
