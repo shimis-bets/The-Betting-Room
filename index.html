@@ -343,7 +343,7 @@ html,body{background:#ece9f3!important}@media (prefers-color-scheme: dark){html,
           <tbody id="st-body"></tbody>
         </table>
       </div>
-      <p class="br-foot">Βαθμολογία με βάση τις μονάδες. Σε ισοβαθμία μετράνε τα σωστά κουπόνια και μετά τα σημεία. Σημεία: πόσα σημεία βγήκαν από όσα έπαιξε. Μονάδες: πόσο θα είχε κερδίσει αν έπαιζε μόνος του 1 μονάδα σε κάθε κουπόνι (κερδισμένο = απόδοση − 1, χαμένο = −1).</p>
+      <p class="br-foot">Βαθμολογία με βάση τα σωστά κουπόνια. Σε ισοβαθμία μετράει το ποσοστό σημείων και μετά οι μονάδες. Σημεία: πόσα σημεία βγήκαν από όσα έπαιξε. Μονάδες: πόσο θα είχε κερδίσει αν έπαιζε μόνος του 1 μονάδα σε κάθε κουπόνι (κερδισμένο = απόδοση − 1, χαμένο = −1).</p>
     </details>
   </section>
 
@@ -665,7 +665,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
 
   dash.calc('standings', {
     title: 'Η πορεία του καθενός',
-    description: 'Ανά παίκτη (επίσημες αγωνιστικές), με θέση στη βαθμολογία κατά μονάδες (σε ισοβαθμία: σωστά κουπόνια, μετά σημεία): κουπόνια, σωστά, λάθος, σημεία που βγήκαν, φόρμα των 5 τελευταίων και μονάδες με 1 μονάδα ανά κουπόνι (κερδισμένο = απόδοση − 1, χαμένο = −1).',
+    description: 'Ανά παίκτη (επίσημες αγωνιστικές), με θέση στη βαθμολογία κατά σωστά κουπόνια (σε ισοβαθμία: ποσοστό σημείων, μετά μονάδες): κουπόνια, σωστά, λάθος, σημεία που βγήκαν, φόρμα των 5 τελευταίων και μονάδες με 1 μονάδα ανά κουπόνι (κερδισμένο = απόδοση − 1, χαμένο = −1).',
     inputs: ['players', 'coupons'],
     fn: (players, coupons) => {
       const done = coupons.filter(x => x.id !== 'template' && !x.test);
@@ -678,7 +678,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
         return { player: p.player, coupons: c.length, won: won, lost: c.length - won, picks: picks, picks_won: picksWon,
           pick_rate: picks ? picksWon / picks : null, form: c.slice(-5).map(x => x.status === 'Κέρδισε' ? 'Σ' : 'Λ').join(''),
           profit: Math.round(profit * 100) / 100 };
-      }).sort((a, b) => b.profit - a.profit || b.won - a.won || (b.pick_rate || 0) - (a.pick_rate || 0) || a.player.localeCompare(b.player))
+      }).sort((a, b) => b.won - a.won || (b.pick_rate || 0) - (a.pick_rate || 0) || b.profit - a.profit || a.player.localeCompare(b.player))
         .map((r, i) => Object.assign({ rank: i + 1 }, r));
     }
   });
