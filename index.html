@@ -510,6 +510,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
           win_rate: c.length ? won / c.length : null, pick_rate: picks ? picksWon / picks : null,
           avg_odds: c.length ? Math.round(c.reduce((s, x) => s + Number(x.odds), 0) / c.length * 100) / 100 : null,
           near_miss: c.filter(x => x.status === 'Έχασε' && Number(x.picks) - Number(x.picks_won) === 1).length,
+          lost_fails: c.filter(x => x.status === 'Έχασε').reduce((s, x) => s + Number(x.picks) - Number(x.picks_won), 0),
           form: c.slice(-5).map(x => x.status === 'Κέρδισε' ? 'Σ' : 'Λ').join(''),
           strong: best ? best.m : null, strong_score: best ? best.ok + '/' + best.n : null,
           weak: worst && worst.r < 1 && (!best || worst.m !== best.m) ? worst.m : null,
@@ -804,10 +805,21 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
     c.appendChild(el('div', 'br-sw', [
       sw('Δυνατό σημείο', 'strong', 'strong_score', p.strong, p.strong_score, 't-good'),
       sw('Αδύναμο σημείο', 'weak', 'weak_score', p.weak, p.weak_score, 't-bad')]));
+    // a plain fact from the stats so far, never advice
     let note;
     if (!p.coupons) note = 'Δεν έχει κριθεί ακόμα κουπόνι.';
-    else if (p.lost && p.near_miss / p.lost >= .5) note = `${p.near_miss} από τα ${p.lost} χαμένα χάθηκαν για ένα μόνο σημείο.`;
-    else if (p.pick_rate !== null && p.win_rate !== null && p.pick_rate >= .65 && p.pick_rate - p.win_rate >= .3) note = 'Τα σημεία βγαίνουν, τα κουπόνια όχι. Ίσως λιγότερα σημεία ανά κουπόνι.';
+    else {
+      const f = [];
+      if (p.pick_rate !== null && p.win_rate !== null && p.pick_rate - p.win_rate >= .3)
+        f.push(`Τα σημεία του βγαίνουν ${pct(p.pick_rate)}, τα κουπόνια ${pct(p.win_rate)}.`);
+      if (!p.lost) f.push(p.coupons === 1 ? 'Το κουπόνι του βγήκε.' : `Και τα ${p.coupons} κουπόνια του βγήκαν.`);
+      else if (p.near_miss) f.push(p.near_miss === p.lost
+        ? (p.lost === 1 ? 'Το χαμένο κουπόνι του χάθηκε για ένα μόνο σημείο.' : `Και τα ${p.lost} χαμένα κουπόνια του χάθηκαν για ένα μόνο σημείο.`)
+        : `${p.near_miss} από τα ${p.lost} χαμένα κουπόνια του ${p.near_miss === 1 ? 'χάθηκε' : 'χάθηκαν'} για ένα μόνο σημείο.`);
+      else f.push(`Στα ${p.lost === 1 ? 'χαμένο κουπόνι' : p.lost + ' χαμένα κουπόνια'} του έπεσαν ${p.lost_fails} ${p.lost_fails === 1 ? 'σημείο' : 'σημεία'}` +
+        (p.lost > 1 ? `, ${(p.lost_fails / p.lost).toFixed(1).replace('.', ',')} ανά κουπόνι.` : '.'));
+      note = f.join(' ');
+    }
     if (note) c.appendChild(el('div', 'br-note', [note]));
     return c;
   }
