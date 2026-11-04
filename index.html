@@ -359,7 +359,7 @@ html,body{background:#ece9f3!important}@media (prefers-color-scheme: dark){html,
     <div class="br-defs">
       <p><b>Σημείο:</b> κάθε πρόβλεψη μέσα στο κουπόνι. Κάθε σκέλος ενός Bet Builder μετράει ως ξεχωριστό σημείο.</p>
       <p><b>Πώς αποφασίζει το AI:</b> μια αγορά προτείνεται όταν βγαίνει 75% και πάνω, είναι ουδέτερη στο 65–74% και καλύτερα να την αποφεύγουμε κάτω από 65%. Χρειάζονται τουλάχιστον 5 σημεία στην αγορά, αλλιώς το δείγμα είναι μικρό.</p>
-      <p><b>Επιλογή:</b> ένα ματς του κουπονιού. <b>Αναμενόμενο:</b> πόσο συχνά «λέει» η απόδοση ότι θα βγει (1 ÷ απόδοση), στους πίνακες πιο κάτω.</p>
+      <p><b>Επιλογή:</b> ένα ματς του κουπονιού. <b>Αναμενόμενο:</b> πόσο συχνά «λέει» η απόδοση ότι θα βγει (1 ÷ απόδοση), στους πίνακες πιο κάτω. Εκεί το ποσοστό είναι πράσινο όταν βγαίνει όσο ή πάνω από το αναμενόμενο, πορτοκαλί έως 5 μονάδες κάτω, κόκκινο πιο κάτω.</p>
     </div>
 
     <h3 class="br-h3">Ανά αγορά</h3>
@@ -376,7 +376,7 @@ html,body{background:#ece9f3!important}@media (prefers-color-scheme: dark){html,
         <tbody id="mk-body"></tbody>
       </table>
     </div>
-    <div class="br-key"><span><i class="b-good"></i>70% και πάνω</span><span><i class="b-mid"></i>50–69%</span><span><i class="b-bad"></i>κάτω από 50%</span><span>αχνές γραμμές στο τέλος: λιγότερα από 3 σημεία, μικρό δείγμα</span></div>
+    <div class="br-key"><span><i class="b-good"></i>75% και πάνω</span><span><i class="b-mid"></i>65–74%</span><span><i class="b-bad"></i>κάτω από 65%</span><span>αχνές γραμμές στο τέλος: λιγότερα από 3 σημεία, μικρό δείγμα</span></div>
 
     <h3 class="br-h3">Τι έριξε το ομαδικό</h3>
     <p class="br-p">Από ποιες αγορές ήρθαν τα σημεία που δεν βγήκαν</p>
@@ -508,7 +508,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
         const worst = ms.slice().sort((a, b) => a.r - b.r || b.n - a.n)[0];
         return { player: p.player, league: p.league, coupons: c.length, won: won, lost: c.length - won, picks: picks, picks_won: picksWon,
           win_rate: c.length ? won / c.length : null, pick_rate: picks ? picksWon / picks : null,
-          avg_odds: c.length ? Math.round(c.reduce((s, x) => s + Number(x.odds), 0) / c.length * 100) / 100 : null,
+          avg_odds: c.length ? Math.round(c.reduce((s, x) => s + Number(x.odds), 0) / c.length * 100 + 1e-6) / 100 : null,
           near_miss: c.filter(x => x.status === 'Έχασε' && Number(x.picks) - Number(x.picks_won) === 1).length,
           lost_fails: c.filter(x => x.status === 'Έχασε').reduce((s, x) => s + Number(x.picks) - Number(x.picks_won), 0),
           form: c.slice(-5).map(x => x.status === 'Κέρδισε' ? 'Σ' : 'Λ').join(''),
@@ -705,7 +705,10 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
     return year ? txt + ' ' + e.getUTCFullYear() : txt;
   };
   const sign = v => v > 0 ? 'pos' : v < 0 ? 'neg' : '';
-  const tone = r => r >= .7 ? 'good' : r >= .5 ? 'mid' : 'bad';
+  // same thresholds as the AI groups: 75%+ good, 65–74% neutral, below 65% weak
+  const tone = r => r >= .75 ? 'good' : r >= .65 ? 'mid' : 'bad';
+  // against the odds: at or above expected good, up to 5 points below neutral, lower weak
+  const toneVs = (r, e) => r >= e - 1e-9 ? 'good' : r >= e - .05 ? 'mid' : 'bad';
   const $ = id => document.getElementById(id);
   let players = [];
   const PCOL = { Shimis: '#f97316', Pourou: '#16a34a', Aggelos: '#eab308', Anthony: '#2563eb', Dorch: '#dc2626' };
@@ -721,7 +724,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
   const dot = name => el('span', 'dot', [], { style: { background: colorOf(name) } });
   const formBadges = f => { const w = el('span', 'form'); String(f || '').split('').forEach(ch => w.appendChild(el('i', ch === 'Σ' ? 'w' : 'l', [ch]))); return w; };
   function empty(tbody, cols, msg) { tbody.textContent = ''; const c = el('td', 'empty', [msg]); c.colSpan = cols; tbody.appendChild(el('tr', '', [c])); }
-  const rateCell = r => el('td', '', [el('span', 'rate', [el('span', 'tr', [el('i', 'b-' + tone(r), [], { style: { width: Math.round(r * 100) + '%' } })]), el('span', 't-' + tone(r), [pct(r)])])]);
+  const rateCell = (r, e) => { const k = e === undefined ? tone(r) : toneVs(r, e); return el('td', '', [el('span', 'rate', [el('span', 'tr', [el('i', 'b-' + k, [], { style: { width: Math.round(r * 100) + '%' } })]), el('span', 't-' + k, [pct(r)])])]); };
   const LEG = { 'Εκκρεμεί': ['unk', '⏳'], 'Σωστό': ['ok', '✓'], 'Λάθος': ['no', '✗'], 'Άγνωστο': ['unk', '?'], 'Επιστροφή': ['push', '↺'] };
 
   function legsBlock(cid, legs) {
@@ -768,7 +771,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
     }
     const lab = svg.append('g').selectAll('text').data(rows).join('text').attr('x', r => cx(r.weekend)).attr('y', r => y(rate(r)) - 22)
       .attr('text-anchor', 'middle').style('font-size', 'var(--cds-font-size-caption)');
-    lab.append('tspan').style('font-weight', 800).style('fill', r => r && cfg.gold && cfg.gold(r) ? '#c9971c' : 'var(--color-' + (rate(r) >= .7 ? 'ok' : rate(r) >= .5 ? 'warn' : 'bad') + ')').text(r => pct(rate(r)));
+    lab.append('tspan').style('font-weight', 800).style('fill', r => r && cfg.gold && cfg.gold(r) ? '#c9971c' : (cfg.neutral ? 'var(--color-fg)' : 'var(--color-' + ({ good: 'ok', mid: 'warn', bad: 'bad' })[tone(rate(r))] + ')')).text(r => pct(rate(r)));
     lab.append('tspan').attr('x', r => cx(r.weekend)).attr('dy', '1.15em').style('fill', 'var(--color-fg-muted)').text(r => cfg.hit(r) + '/' + cfg.total(r));
     const every = Math.max(1, Math.ceil(rows.length / Math.max(1, Math.floor((W - left) / 64))));
     svg.append('g').selectAll('text').data(rows.filter((r, i) => i % every === 0)).join('text').attr('x', r => cx(r.weekend)).attr('y', H - 6)
@@ -896,7 +899,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
     if (res.status === 'ok' && res.data.length) {
       tbody.textContent = '';
       res.data.forEach(r => tbody.appendChild(el('tr', r.selections < 5 ? 'small' : '', [el('td', 'l nm', [r[keyField]]), el('td', '', [String(r.won)]), el('td', '', [String(r.selections)]),
-        rateCell(r.rate), el('td', 'exp', [r.expected === undefined ? '—' : pct(r.expected)])])));
+        rateCell(r.rate, r.expected), el('td', 'exp', [r.expected === undefined ? '—' : pct(r.expected)])])));
     } else empty(tbody, 5, 'Δεν υπάρχουν ακόμα δεδομένα.');
   }
 
@@ -981,7 +984,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
     // chart
     const ch = $('chart'), ch2 = $('chart2');
     if (tw.status === 'ok') {
-      drawBars(ch, tw.data, { total: r => r.total - (r.pending || 0), hit: r => r.hit, gold: r => r.all_hit,
+      drawBars(ch, tw.data, { neutral: true, total: r => r.total - (r.pending || 0), hit: r => r.hit, gold: r => r.all_hit,
         tip: r => [`Κουπόνια: ${r.hit}/${r.total - (r.pending || 0)} (${pct(r.hit / Math.max(1, r.total - (r.pending || 0)))})` + (r.pending ? `, ${r.pending} εκκρεμεί` : '') + (r.all_hit ? ', πιάσαμε όλοι' : ''), `Απόδοση 5 κουπονιών μαζί: ${bigOdds(r.combo_odds)}`,
           r.all_hit ? `Κέρδος: ${eur(r.payout)}` : `Με 10€ θα έδινε ${eur(10 * r.combo_odds)}`] });
       drawBars(ch2, tw.data, { total: r => r.picks, hit: r => r.picks_won,
