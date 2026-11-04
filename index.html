@@ -325,7 +325,7 @@ html,body{background:#ece9f3!important}@media (prefers-color-scheme: dark){html,
   <section class="br-sec" id="players">
     <div class="br-h"><h2>Οι παίκτες</h2><p>Πώς πάει ο καθένας στις επίσημες αγωνιστικές, για να βλέπουμε πού χρειάζεται βοήθεια.</p></div>
     <div class="br-cards" id="cards"></div>
-    <p class="br-foot">Σημείο: κάθε πρόβλεψη μέσα στο κουπόνι (κάθε σκέλος του Bet Builder μετράει χωριστά). Μέση απόδοση: η μέση απόδοση των κουπονιών του. Παρά λίγο: κουπόνια που χάθηκαν για ένα μόνο σημείο. Δυνατό και αδύναμο σημείο: η αγορά που του βγαίνει καλύτερα και χειρότερα, από 2 σημεία και πάνω (μετράει και πόσα έπαιξε, ώστε το 11/13 να μη χάνει από ένα 3/3).</p>
+    <p class="br-foot">Σημείο: κάθε πρόβλεψη μέσα στο κουπόνι (κάθε σκέλος του Bet Builder μετράει χωριστά). Μέση απόδοση: η μέση απόδοση των κουπονιών του. Παρά λίγο: κουπόνια που χάθηκαν για ένα μόνο σημείο. Τα κουτάκια Σ/Λ: κάθε αγωνιστική με τη σειρά, η πιο πρόσφατη δεξιά. Δυνατό και αδύναμο σημείο: η αγορά που του βγαίνει καλύτερα και χειρότερα, από 2 σημεία και πάνω (μετράει και πόσα έπαιξε, ώστε το 11/13 να μη χάνει από ένα 3/3).</p>
   </section>
 
   <section class="br-sec" id="standings">
@@ -346,7 +346,7 @@ html,body{background:#ece9f3!important}@media (prefers-color-scheme: dark){html,
           <tbody id="st-body"></tbody>
         </table>
       </div>
-      <p class="br-foot">Βαθμολογία με βάση τα σωστά κουπόνια. Σε ισοβαθμία μετράει το ποσοστό σημείων. Σημεία: πόσα σημεία βγήκαν από όσα έπαιξε. Πόντοι: σωστό κουπόνι +1, χαμένο −1.</p>
+      <p class="br-foot">Βαθμολογία με βάση τα σωστά κουπόνια. Σε ισοβαθμία μετράει το ποσοστό σημείων. Σημεία: πόσα σημεία βγήκαν από όσα έπαιξε. Πόντοι: σωστό κουπόνι +1, χαμένο −1. Φόρμα: Σ σωστό, Λ χαμένο κουπόνι σε κάθε αγωνιστική με τη σειρά, η πιο πρόσφατη δεξιά.</p>
     </details>
   </section>
 
@@ -489,7 +489,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
 
   dash.calc('profiles', {
     title: 'Οι παίκτες',
-    description: 'Ανά παίκτη (επίσημες αγωνιστικές): σωστά και λάθος κουπόνια, ποσοστό κουπονιών και σημείων που βγήκαν, μέση απόδοση, κουπόνια που χάθηκαν για ένα σημείο, φόρμα, και η αγορά με το καλύτερο και το χειρότερο ποσοστό (από 2 σημεία και πάνω).',
+    description: 'Ανά παίκτη (επίσημες αγωνιστικές): σωστά και λάθος κουπόνια, ποσοστό κουπονιών και σημείων που βγήκαν, μέση απόδοση, κουπόνια που χάθηκαν για ένα σημείο, φόρμα (κάθε αγωνιστική με τη σειρά, έως τις 8 τελευταίες), και η αγορά με το καλύτερο και το χειρότερο ποσοστό (από 2 σημεία και πάνω).',
     inputs: ['players', 'coupons', 'legs'],
     fn: (players, coupons, legs) => {
       const done = coupons.filter(x => x.id !== 'template' && !x.test);
@@ -512,7 +512,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
           avg_odds: c.length ? Math.round(c.reduce((s, x) => s + Number(x.odds), 0) / c.length * 100 + 1e-6) / 100 : null,
           near_miss: c.filter(x => x.status === 'Έχασε' && Number(x.picks) - Number(x.picks_won) === 1).length,
           lost_fails: c.filter(x => x.status === 'Έχασε').reduce((s, x) => s + Number(x.picks) - Number(x.picks_won), 0),
-          form: c.slice(-5).map(x => x.status === 'Κέρδισε' ? 'Σ' : 'Λ').join(''),
+          form: c.slice(-8).map(x => x.status === 'Κέρδισε' ? 'Σ' : 'Λ').join(''),
           strong: best ? best.m : null, strong_score: best ? best.ok + '/' + best.n : null,
           weak: worst && worst.r < 1 && (!best || worst.m !== best.m) ? worst.m : null,
           weak_score: worst && worst.r < 1 && (!best || worst.m !== best.m) ? worst.ok + '/' + worst.n : null };
@@ -680,7 +680,7 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
         const picks = c.reduce((s, x) => s + Number(x.picks), 0);
         const picksWon = c.reduce((s, x) => s + Number(x.picks_won), 0);
         return { player: p.player, coupons: c.length, won: won, lost: c.length - won, picks: picks, picks_won: picksWon,
-          pick_rate: picks ? picksWon / picks : null, form: c.slice(-5).map(x => x.status === 'Κέρδισε' ? 'Σ' : 'Λ').join(''),
+          pick_rate: picks ? picksWon / picks : null, form: c.slice(-8).map(x => x.status === 'Κέρδισε' ? 'Σ' : 'Λ').join(''),
           points: won - (c.length - won) };
       }).sort((a, b) => b.won - a.won || (b.pick_rate || 0) - (a.pick_rate || 0) || b.points - a.points || a.player.localeCompare(b.player))
         .map((r, i) => Object.assign({ rank: i + 1 }, r));
