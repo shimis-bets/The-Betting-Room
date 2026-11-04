@@ -286,8 +286,8 @@ html,body{background:#ece9f3!important}@media (prefers-color-scheme: dark){html,
 
     <p class="br-kpis-h">Όλη η σεζόν (επίσημες αγωνιστικές)</p>
     <div class="br-kpis">
-      <div class="br-kpi"><div class="v"><span id="k-won" data-source="team" data-field="won" data-row="0">—</span><small>/<span id="k-cp" data-source="team" data-field="coupons" data-row="0">—</span></small></div><div class="l">κουπόνια βγήκαν <span id="k-rate" data-source="team" data-field="win_rate" data-row="0"></span></div></div>
-      <div class="br-kpi"><div class="v"><span id="k-pw" data-source="team" data-field="picks_won" data-row="0">—</span><small>/<span id="k-pt" data-source="team" data-field="picks" data-row="0">—</span></small></div><div class="l">σημεία βγήκαν <span id="k-picks" data-source="team" data-field="pick_rate" data-row="0"></span></div></div>
+      <div class="br-kpi"><div class="v"><span id="k-won" data-source="team" data-field="won" data-row="0">—</span><small>/<span id="k-cp" data-source="team" data-field="coupons" data-row="0">—</span></small></div><div class="l">κουπόνια βγήκαν (<span id="k-rate" data-source="team" data-field="win_rate" data-row="0"></span>)</div></div>
+      <div class="br-kpi"><div class="v"><span id="k-pw" data-source="team" data-field="picks_won" data-row="0">—</span><small>/<span id="k-pt" data-source="team" data-field="picks" data-row="0">—</span></small></div><div class="l">σημεία βγήκαν (<span id="k-picks" data-source="team" data-field="pick_rate" data-row="0"></span>)</div></div>
       <div class="br-kpi"><div class="v" id="k-net" data-source="team" data-field="net" data-row="0">—</div><div class="l">ταμείο ομαδικού: <span id="k-inv" data-source="team" data-field="invested" data-row="0">—</span> παίχτηκαν, <span id="k-ret" data-source="team" data-field="returned" data-row="0">—</span> κέρδη</div></div>
     </div>
     <p class="br-kpis-f">Σημείο = κάθε πρόβλεψη μέσα στο κουπόνι (κάθε σκέλος του Bet Builder μετράει χωριστά). Το ομαδικό είναι τα 5 κουπόνια μαζί με 10€ κάθε αγωνιστική.</p>
@@ -928,9 +928,9 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
       $('season').textContent = t.weeks ? `Σεζόν 2026/27, ${t.weeks} επίσημες αγωνιστικές` : 'Σεζόν 2026/27, πριν τη σέντρα';
       $('b-hit').textContent = t.last_hit === null ? '—' : String(t.last_hit);
       $('b-tot').textContent = t.last_total === null ? '—' : String(t.last_total);
-      $('k-rate').textContent = t.win_rate === null ? '' : '(' + pct(t.win_rate) + ')';
+      $('k-rate').textContent = t.win_rate === null ? '—' : pct(t.win_rate);
       $('k-won').textContent = String(t.won); $('k-cp').textContent = String(t.coupons);
-      $('k-picks').textContent = t.pick_rate === null ? '' : '(' + pct(t.pick_rate) + ')';
+      $('k-picks').textContent = t.pick_rate === null ? '—' : pct(t.pick_rate);
       $('k-pw').textContent = String(t.picks_won); $('k-pt').textContent = String(t.picks);
       $('k-net').textContent = money(t.net, true); $('k-net').className = 'v ' + sign(t.net);
       $('k-inv').textContent = money(t.invested); $('k-ret').textContent = money(t.returned);
