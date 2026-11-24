@@ -547,9 +547,9 @@ window.__DATA__ = {"players": [{"player": "Pourou", "league": "Premier League (�
       legs.filter(x => x.id !== 'template' && !x.test).forEach(x => {
         const k = x.coupon_id + '#' + x.sel;
         const s = sels[k] || (sels[k] = { key: k, player: x.player, odds: Number(x.sel_odds), type: x.sel_type, n: 0, no: 0, unk: 0 });
-        s.n += 1; if (x.result === 'Λάθος') s.no += 1; if (x.result === 'Άγνωστο' || x.result === 'Εκκρεμεί') s.unk += 1;
+        s.n += 1; if (x.result === 'Λάθος') s.no += 1; if (x.result === 'Άγνωστο' || x.result === 'Εκκρεμεί') s.unk += 1; if (x.result === 'Επιστροφή') s.push = (s.push || 0) + 1;
       });
-      return Object.values(sels).filter(s => s.no > 0 || s.unk === 0)
+      return Object.values(sels).filter(s => (s.no > 0 || s.unk === 0) && (s.push || 0) < s.n) // a fully void selection is not a win
         .map(s => ({ key: s.key, player: s.player, odds: s.odds, type: s.type, legs: s.n, won: s.no === 0 ? 1 : 0, expected: Math.round(1 / s.odds * 10000) / 10000 }));
     }
   });
